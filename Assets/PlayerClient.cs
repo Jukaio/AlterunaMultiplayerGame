@@ -34,9 +34,11 @@ public class PlayerClient : MonoBehaviour
     private void CreateUser(User user)
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Client));
+        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Client), typeof(Velocity));
         var e = manager.CreateEntity(clientArchetype);
         manager.AddComponentData(e, new Client { index = user.Index });
+        manager.AddComponentData(e, new Velocity { value = new Unity.Mathematics.float3(1.0f, 1.0f, 1.0f) });
         this.entity = e;
     }
+
 }

@@ -16,7 +16,7 @@ public partial class RenderSystem : SystemBase
     {
         // SystemAPI is single threaded
         foreach(var position in SystemAPI.Query<RefRW<Position>>()) {
-
+           
         }
         
     }
