@@ -7,6 +7,11 @@ using Unity.Collections;
 using UnityEngine.InputSystem;
 
 
+struct LocalPlayer : IComponentData
+{
+
+}
+
 public struct InputComp : IComponentData
 {
     public bool Forward;
@@ -17,14 +22,13 @@ public struct InputComp : IComponentData
 }
 
 [UpdateBefore(typeof(InputToVelocitySystem))]
-public partial class PlayerInputSystem : SystemBase
+public partial class LocalInputSystem : SystemBase
 {
     private InputActions m_InputActions;
     private InputActions.PlayerActionMapActions m_PlayerInputActions;
 
     EntityQuery query;
     ComponentLookup<InputComp> m_InputCompLookup;
-    ComponentLookup<Client> m_ClientLookup;
 
     protected override void OnDestroy()
     {
@@ -39,10 +43,10 @@ public partial class PlayerInputSystem : SystemBase
         m_PlayerInputActions = m_InputActions.PlayerActionMap;
 
         query = new EntityQueryBuilder(Allocator.Temp)
-           .WithAllRW<InputComp, Client>()
+           .WithAllRW<InputComp>()
+           .WithAll<LocalPlayer>()
            .Build(ref CheckedStateRef);
         m_InputCompLookup = CheckedStateRef.GetComponentLookup<InputComp>();
-        m_ClientLookup = CheckedStateRef.GetComponentLookup<Client>();
     }
 
     protected override void OnUpdate()
@@ -59,21 +63,10 @@ public partial class PlayerInputSystem : SystemBase
 
         var entities = query.ToEntityArray(Allocator.Temp);
         m_InputCompLookup.Update(ref CheckedStateRef);
-        m_ClientLookup.Update(ref CheckedStateRef);
-
-        //Debug.Log(
-        //    "forward=" + comp.Forward +
-        //    "||| Back=" + comp.Back +
-        //    "||| left=" + comp.TurnLeft +
-        //    "||| right=" + comp.TurnRight +
-        //    "||| Shoot=" + comp.Shoot);
-
+  
         foreach (var entity in entities)
-        {
-            if (m_ClientLookup[entity].index == 0)
-            {
+        {    
                 m_InputCompLookup[entity] = comp;
-            }
         }
     }
 }
