@@ -20,16 +20,16 @@ public class InputReplicationSystem : Synchronizable
         }
     }
 
-    NativeHashMap<ID, Entity> _entityLookup;
+    NativeHashMap<ID, Entity> m_EntityLookup;
 
     private void Awake()
     {
-        _entityLookup = new NativeHashMap<ID, Entity>(1024, Allocator.Persistent);
+        m_EntityLookup = new NativeHashMap<ID, Entity>(1024, Allocator.Persistent);
     }
 
     private void OnDestroy()
     {
-        _entityLookup.Dispose();
+        m_EntityLookup.Dispose();
     }
 
     public override void AssembleData(Writer writer, byte LOD = 100)
@@ -72,7 +72,7 @@ public class InputReplicationSystem : Synchronizable
             tempID.entityIndex = entites[i].Index;
             tempID.client = clients[i].index;
 
-            if (_entityLookup.TryGetValue(tempID, out oEntity))
+            if (m_EntityLookup.TryGetValue(tempID, out oEntity))
             {
                 manager.SetComponentData(oEntity, inputComps[i]);
             }
