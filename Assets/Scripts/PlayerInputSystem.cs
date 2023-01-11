@@ -17,7 +17,7 @@ public struct InputComp : IComponentData
 }
 
 
-public partial struct PlayerInputSystem : ISystem
+public partial class PlayerInputSystem : SystemBase
 {
     private InputActions m_InputActions;
     private InputActions.PlayerActionMapActions m_PlayerInputActions;
@@ -25,39 +25,39 @@ public partial struct PlayerInputSystem : ISystem
     EntityQuery query;
     ComponentLookup<InputComp> m_InputCompLookup;
 
-    public void OnDestroy(ref SystemState state)
+    protected override void OnDestroy()
     {
         throw new System.NotImplementedException();
     }
 
-    public void OnCreate(ref SystemState state)
+    protected override void OnCreate()
     {
         m_InputActions = new InputActions();
         m_InputActions.Enable();
 
         m_PlayerInputActions = m_InputActions.PlayerActionMap;
-
+        
         query = new EntityQueryBuilder(Allocator.Temp)
            .WithAllRW<InputComp>()
            .WithAll<Client>()
-           .Build(ref state);
-        m_InputCompLookup = state.GetComponentLookup<InputComp>();
+           .Build(ref CheckedStateRef);
+        m_InputCompLookup = CheckedStateRef.GetComponentLookup<InputComp>();
     }
 
-    public void OnUpdate(ref SystemState state)
+    protected override void OnUpdate()
     {
         InputSystem.Update();
 
-        InputComp comp= new InputComp();
+        InputComp comp = new InputComp();
 
         comp.Forward = m_PlayerInputActions.MoveForward.ReadValue<bool>();
         comp.Back = m_PlayerInputActions.MoveBackwards.ReadValue<bool>();
         comp.TurnLeft = m_PlayerInputActions.TurnLeft.ReadValue<bool>();
         comp.TurnRight = m_PlayerInputActions.TurnRight.ReadValue<bool>();
         comp.Shoot = m_PlayerInputActions.Shoot.ReadValue<bool>();
- 
+
         var entities = query.ToEntityArray(Allocator.Temp);
-        m_InputCompLookup.Update(ref state);
+        m_InputCompLookup.Update(ref CheckedStateRef);
 
         //TODO should probably only apply to local player
         foreach (var entity in entities)
