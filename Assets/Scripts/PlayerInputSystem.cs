@@ -16,7 +16,7 @@ public struct InputComp : IComponentData
     public bool Shoot;
 }
 
-
+[UpdateBefore(typeof(InputToVelocitySystem))]
 public partial class PlayerInputSystem : SystemBase
 {
     private InputActions m_InputActions;
@@ -50,14 +50,21 @@ public partial class PlayerInputSystem : SystemBase
 
         InputComp comp = new InputComp();
 
-        comp.Forward = m_PlayerInputActions.MoveForward.ReadValue<bool>();
-        comp.Back = m_PlayerInputActions.MoveBackwards.ReadValue<bool>();
-        comp.TurnLeft = m_PlayerInputActions.TurnLeft.ReadValue<bool>();
-        comp.TurnRight = m_PlayerInputActions.TurnRight.ReadValue<bool>();
-        comp.Shoot = m_PlayerInputActions.Shoot.ReadValue<bool>();
+        comp.Forward = m_PlayerInputActions.MoveForward.ReadValue<float>()  > 0.1f;
+        comp.Back = m_PlayerInputActions.MoveBackwards.ReadValue<float>()   > 0.1f;
+        comp.TurnLeft = m_PlayerInputActions.TurnLeft.ReadValue<float>()    > 0.1f;
+        comp.TurnRight = m_PlayerInputActions.TurnRight.ReadValue<float>()  > 0.1f;
+        comp.Shoot = m_PlayerInputActions.Shoot.ReadValue<float>()          > 0.1f;
 
         var entities = query.ToEntityArray(Allocator.Temp);
         m_InputCompLookup.Update(ref CheckedStateRef);
+
+        //Debug.Log(
+        //    "forward=" + comp.Forward +
+        //    "||| Back=" + comp.Back +
+        //    "||| left=" + comp.TurnLeft +
+        //    "||| right=" + comp.TurnRight +
+        //    "||| Shoot=" + comp.Shoot);
 
         //TODO should probably only apply to local player
         foreach (var entity in entities)
