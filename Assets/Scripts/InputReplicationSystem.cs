@@ -67,6 +67,8 @@ public class InputReplicationSystem : Synchronizable
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         for (int i = 0; i < entites.Length; i++)
         {
+            //TODO we do this ID thing to make sure that we get the correct entites on each client, however Right now I think there is a problem.
+            //mostlikley we dont actually populate the ID hashmap which means, we never find the correct entity and component
             Entity oEntity;
             ID tempID;
             tempID.entityIndex = entites[i].Index;
