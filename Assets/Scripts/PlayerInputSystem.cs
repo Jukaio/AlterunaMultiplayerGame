@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 
 
 public struct InputComp : IComponentData
-{ 
+{
     public bool Forward;
     public bool Back;
     public bool TurnLeft;
@@ -24,6 +24,7 @@ public partial class PlayerInputSystem : SystemBase
 
     EntityQuery query;
     ComponentLookup<InputComp> m_InputCompLookup;
+    ComponentLookup<Client> m_ClientLookup;
 
     protected override void OnDestroy()
     {
@@ -36,12 +37,12 @@ public partial class PlayerInputSystem : SystemBase
         m_InputActions.Enable();
 
         m_PlayerInputActions = m_InputActions.PlayerActionMap;
-        
+
         query = new EntityQueryBuilder(Allocator.Temp)
-           .WithAllRW<InputComp>()
-           .WithAll<Client>()
+           .WithAllRW<InputComp, Client>()
            .Build(ref CheckedStateRef);
         m_InputCompLookup = CheckedStateRef.GetComponentLookup<InputComp>();
+        m_ClientLookup = CheckedStateRef.GetComponentLookup<Client>();
     }
 
     protected override void OnUpdate()
@@ -50,14 +51,15 @@ public partial class PlayerInputSystem : SystemBase
 
         InputComp comp = new InputComp();
 
-        comp.Forward = m_PlayerInputActions.MoveForward.ReadValue<float>()  > 0.1f;
-        comp.Back = m_PlayerInputActions.MoveBackwards.ReadValue<float>()   > 0.1f;
-        comp.TurnLeft = m_PlayerInputActions.TurnLeft.ReadValue<float>()    > 0.1f;
-        comp.TurnRight = m_PlayerInputActions.TurnRight.ReadValue<float>()  > 0.1f;
-        comp.Shoot = m_PlayerInputActions.Shoot.ReadValue<float>()          > 0.1f;
+        comp.Forward = m_PlayerInputActions.MoveForward.ReadValue<float>() > 0.1f;
+        comp.Back = m_PlayerInputActions.MoveBackwards.ReadValue<float>() > 0.1f;
+        comp.TurnLeft = m_PlayerInputActions.TurnLeft.ReadValue<float>() > 0.1f;
+        comp.TurnRight = m_PlayerInputActions.TurnRight.ReadValue<float>() > 0.1f;
+        comp.Shoot = m_PlayerInputActions.Shoot.ReadValue<float>() > 0.1f;
 
         var entities = query.ToEntityArray(Allocator.Temp);
         m_InputCompLookup.Update(ref CheckedStateRef);
+        m_ClientLookup.Update(ref CheckedStateRef);
 
         //Debug.Log(
         //    "forward=" + comp.Forward +
@@ -66,10 +68,12 @@ public partial class PlayerInputSystem : SystemBase
         //    "||| right=" + comp.TurnRight +
         //    "||| Shoot=" + comp.Shoot);
 
-        //TODO should probably only apply to local player
         foreach (var entity in entities)
         {
-            m_InputCompLookup[entity] = comp;
+            if (m_ClientLookup[entity].index == 0)
+            {
+                m_InputCompLookup[entity] = comp;
+            }
         }
     }
 }
