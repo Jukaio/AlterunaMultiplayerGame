@@ -79,4 +79,10 @@ public class InputReplicationSystem : Synchronizable
         }
     }
 
+    private void Update()
+    {
+        Commit();
+        base.SyncUpdate();
+    }
+
 }
