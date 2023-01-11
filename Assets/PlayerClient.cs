@@ -34,11 +34,32 @@ public class PlayerClient : MonoBehaviour
     private void CreateUser(User user)
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Client), typeof(Velocity));
+
+        EntityArchetype clientArchetype;
+        //this is how you check if the user is a local player
+        if (avatar.IsMe)
+        {
+            clientArchetype = manager.CreateArchetype(
+                typeof(Position),
+                typeof(Client),
+                typeof(Velocity),
+                typeof(InputComp),
+                typeof(LocalPlayer));  
+        }
+        else
+        {
+            clientArchetype = manager.CreateArchetype(
+                typeof(Position),
+                typeof(Client),
+                typeof(Velocity),
+                typeof(InputComp));
+        }
+
         var e = manager.CreateEntity(clientArchetype);
-        manager.AddComponentData(e, new Client { index = user.Index });
-        manager.AddComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
+        manager.SetComponentData(e, new Client { index = user.Index });
         this.entity = e;
+
+
     }
 
 }
