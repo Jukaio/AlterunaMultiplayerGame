@@ -17,13 +17,15 @@ public partial struct InputToVelocitySystem : ISystem
 {
     EntityQuery query;
     ComponentLookup<Velocity> velocities;
+    ComponentLookup<InputComp> inputComps;
     public void OnCreate(ref SystemState state)
     {
         query = new EntityQueryBuilder(Allocator.Temp)
-            .WithAllRW<Velocity>()
+            .WithAllRW<Velocity, InputComp>()
             .WithAll<Client>()
             .Build(ref state);
         velocities = state.GetComponentLookup<Velocity>(false);
+        inputComps = state.GetComponentLookup<InputComp>(false);
     }
 
     public void OnDestroy(ref SystemState state)
@@ -32,12 +34,24 @@ public partial struct InputToVelocitySystem : ISystem
     }
 
     public void OnUpdate(ref SystemState state)
-    {   
+    {
         var entities = query.ToEntityArray(Allocator.Temp);
         velocities.Update(ref state);
+        inputComps.Update(ref state);
 
-        foreach (var entity in entities) {
-            velocities[entity] = new Velocity { value = math.float3(0.0f, 0.016f, 0.0f) };
+        foreach (var entity in entities)
+        {
+            float speed = 0.01f;
+            var input = inputComps[entity];
+            var vel = math.float3(
+                input.TurnLeft ? -speed : input.TurnRight ? speed : 0f,
+                input.Forward ? speed : input.Back ? -speed : 0f,
+                0f);
+
+
+           //TODO vel needs to be normailized
+           
+            velocities[entity] = new Velocity { value = vel };
         }
     }
 }
@@ -65,7 +79,8 @@ public partial struct MovementSystem : ISystem
         var positions = state.GetComponentLookup<Position>(false);
         var velocities = state.GetComponentLookup<Velocity>(false);
 
-        foreach (var entity in entities) {
+        foreach (var entity in entities)
+        {
             var pos = positions[entity].value;
             var vel = velocities[entity].value;
             positions[entity] = new Position { value = pos + vel };
