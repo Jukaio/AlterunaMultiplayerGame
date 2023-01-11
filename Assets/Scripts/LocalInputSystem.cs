@@ -7,8 +7,13 @@ using Unity.Collections;
 using UnityEngine.InputSystem;
 
 
+struct LocalPlayer : IComponentData
+{
+
+}
+
 public struct InputComp : IComponentData
-{ 
+{
     public bool Forward;
     public bool Back;
     public bool TurnLeft;
@@ -17,7 +22,7 @@ public struct InputComp : IComponentData
 }
 
 [UpdateBefore(typeof(InputToVelocitySystem))]
-public partial class PlayerInputSystem : SystemBase
+public partial class LocalInputSystem : SystemBase
 {
     private InputActions m_InputActions;
     private InputActions.PlayerActionMapActions m_PlayerInputActions;
@@ -36,10 +41,10 @@ public partial class PlayerInputSystem : SystemBase
         m_InputActions.Enable();
 
         m_PlayerInputActions = m_InputActions.PlayerActionMap;
-        
+
         query = new EntityQueryBuilder(Allocator.Temp)
            .WithAllRW<InputComp>()
-           .WithAll<Client>()
+           .WithAll<LocalPlayer>()
            .Build(ref CheckedStateRef);
         m_InputCompLookup = CheckedStateRef.GetComponentLookup<InputComp>();
     }
@@ -50,26 +55,18 @@ public partial class PlayerInputSystem : SystemBase
 
         InputComp comp = new InputComp();
 
-        comp.Forward = m_PlayerInputActions.MoveForward.ReadValue<float>()  > 0.1f;
-        comp.Back = m_PlayerInputActions.MoveBackwards.ReadValue<float>()   > 0.1f;
-        comp.TurnLeft = m_PlayerInputActions.TurnLeft.ReadValue<float>()    > 0.1f;
-        comp.TurnRight = m_PlayerInputActions.TurnRight.ReadValue<float>()  > 0.1f;
-        comp.Shoot = m_PlayerInputActions.Shoot.ReadValue<float>()          > 0.1f;
+        comp.Forward = m_PlayerInputActions.MoveForward.ReadValue<float>() > 0.1f;
+        comp.Back = m_PlayerInputActions.MoveBackwards.ReadValue<float>() > 0.1f;
+        comp.TurnLeft = m_PlayerInputActions.TurnLeft.ReadValue<float>() > 0.1f;
+        comp.TurnRight = m_PlayerInputActions.TurnRight.ReadValue<float>() > 0.1f;
+        comp.Shoot = m_PlayerInputActions.Shoot.ReadValue<float>() > 0.1f;
 
         var entities = query.ToEntityArray(Allocator.Temp);
         m_InputCompLookup.Update(ref CheckedStateRef);
-
-        //Debug.Log(
-        //    "forward=" + comp.Forward +
-        //    "||| Back=" + comp.Back +
-        //    "||| left=" + comp.TurnLeft +
-        //    "||| right=" + comp.TurnRight +
-        //    "||| Shoot=" + comp.Shoot);
-
-        //TODO should probably only apply to local player
+  
         foreach (var entity in entities)
-        {
-            m_InputCompLookup[entity] = comp;
+        {    
+                m_InputCompLookup[entity] = comp;
         }
     }
 }
