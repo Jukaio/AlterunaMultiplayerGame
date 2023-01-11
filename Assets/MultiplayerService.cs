@@ -11,6 +11,11 @@ public struct Client : IComponentData
     public ushort index;
 }
 
+public struct LocalInfo : IComponentData
+{
+    public ushort index;
+}
+
 public class MultiplayerService : MonoBehaviour
 {
     private Multiplayer multiplayer = null;
@@ -59,7 +64,10 @@ public class MultiplayerService : MonoBehaviour
     private void OnConnect(Multiplayer mp, Endpoint ep)
     {
         Debug.Log($"Conntected... {ep.Name}");
-        
+        LocalInfo localInfo = new();
+        localInfo.index = mp.Me.Index;
+
+        World.DefaultGameObjectInjectionWorld.EntityManager.CreateSingleton(localInfo, "Local Info");
     }
 
     private void OnDisconnect(Multiplayer mp, Endpoint ep)
