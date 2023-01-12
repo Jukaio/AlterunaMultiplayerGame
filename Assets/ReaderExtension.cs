@@ -8,6 +8,6 @@ public static class ReaderExtension
     {
         var asBytes = reader.ReadByteArray();
         var bytes = new NativeArray<byte>(asBytes, Allocator.Temp);
-        return bytes.Reinterpret<T>(UnsafeUtility.SizeOf<T>());
+        return bytes.Reinterpret<T>(UnsafeUtility.SizeOf<byte>());
     }
 }
