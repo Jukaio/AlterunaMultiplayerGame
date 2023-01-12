@@ -41,28 +41,16 @@ public class InputReplicationSystem : Synchronizable
         var inputComps = query.ToComponentDataArray<InputComp>(Allocator.Temp);
         var clients = query.ToComponentDataArray<Client>(Allocator.Temp);
 
-        var entitesAsBytes = entities.Reinterpret<byte>(UnsafeUtility.SizeOf<byte>()).ToArray();
-        var clientsAsBytes = clients.Reinterpret<byte>(UnsafeUtility.SizeOf<byte>()).ToArray();
-        var inputCompsAsBytes = inputComps.Reinterpret<byte>(UnsafeUtility.SizeOf<byte>()).ToArray();
-
-        writer.Write(entitesAsBytes);
-        writer.Write(clientsAsBytes);
-        writer.Write(inputCompsAsBytes);
+        writer.Write(entities);
+        writer.Write(clients);
+        writer.Write(inputComps);
     }
 
     public override void DisassembleData(Reader reader, byte LOD = 100)
     {
-        var entitesAsBytes = reader.ReadByteArray();
-        NativeArray<byte> nativeEntitesAsBytes = new NativeArray<byte>(entitesAsBytes, Allocator.Temp);
-        var entites = nativeEntitesAsBytes.Reinterpret<Entity>(UnsafeUtility.SizeOf<Entity>());
-
-        var clientsAsBytes = reader.ReadByteArray();
-        NativeArray<byte> nativeClientsAsBytes = new NativeArray<byte>(clientsAsBytes, Allocator.Temp);
-        var clients = nativeClientsAsBytes.Reinterpret<Client>(UnsafeUtility.SizeOf<Client>());
-
-        var inputCompsAsBytes = reader.ReadByteArray();
-        NativeArray<byte> nativeInputCompsAsBytes = new NativeArray<byte>(inputCompsAsBytes, Allocator.Temp);
-        var inputComps = nativeInputCompsAsBytes.Reinterpret<InputComp>(UnsafeUtility.SizeOf<InputComp>());
+        var entites = reader.Read<Entity>();
+        var clients = reader.Read<Client>();
+        var inputComps = reader.Read<InputComp>();
 
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         for (int i = 0; i < entites.Length; i++)
