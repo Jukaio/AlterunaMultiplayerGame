@@ -47,12 +47,12 @@ public partial struct InputToVelocitySystem : ISystem
         inputComps.Update(ref state);
         
         
-        float speed = 0.01f;
+        float speed = 1f;
 
         foreach (var entity in entities) 
         {
             var input = inputComps[entity];
-            var vel = (input.Forward ? speed : input.Back ? -speed : 0f)*speed;
+            var vel = (input.Forward ? speed : input.Back ? -speed : 0f);
             velocities[entity] = new Velocity { value = math.float3(0.0f,vel, 0.0f) };
         }
     }
@@ -86,12 +86,13 @@ public partial struct InputToRotationSystem : ISystem
         rotation.Update(ref state);
         inputComps.Update(ref state);
 
-        float speed = 0.01f;
+        float speed = 1f;
         foreach (var entity in entities) 
         {
             var input = inputComps[entity];
-            var vel = (input.TurnRight ? speed : input.TurnLeft ? -speed : 0f) * speed;
-            rotation[entity] = new Rotation { value =  vel};
+            var rotAdd = (input.TurnRight ? -speed : input.TurnLeft ? speed : 0f);
+            var currentRot = rotation[entity].value;
+            rotation[entity] = new Rotation { value = currentRot + rotAdd};
         }
     }
 }
