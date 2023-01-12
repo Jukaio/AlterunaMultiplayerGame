@@ -12,11 +12,10 @@ public class InputReplicationSystem : Synchronizable
     struct ID : System.IEquatable<ID>
     {
         public ushort client;
-        public int entityIndex;
 
         public bool Equals(ID other)
         {
-            return client == other.client && entityIndex == other.entityIndex;
+            return client == other.client;
         }
     }
 
@@ -57,9 +56,9 @@ public class InputReplicationSystem : Synchronizable
         {
             //TODO we do this ID thing to make sure that we get the correct entites on each client, however Right now I think there is a problem.
             //mostlikley we dont actually populate the ID hashmap which means, we never find the correct entity and component
+            //Ok so clients are what seem to be consistent across network, there fore using teh clien we need to make sure that the correct entity gets set on each local version
             Entity oEntity;
             ID tempID;
-            tempID.entityIndex = entites[i].Index;
             tempID.client = clients[i].index;
 
             if (m_EntityLookup.TryGetValue(tempID, out oEntity))
