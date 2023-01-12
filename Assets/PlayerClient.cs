@@ -59,7 +59,14 @@ public class PlayerClient : MonoBehaviour
         manager.SetComponentData(e, new Client { index = user.Index });
         this.entity = e;
 
+        //TODO here we need to get the CLientToEntityTranslator and store the entity wiht the correct client locally
+       
+        //var query = manager.CreateEntityQuery(typeof(ClientToEntityTranslator));
+        //var lookup=query.chec
+        //for (int i = 0; i < length; i++)
+        //{
 
+        //}
     }
 
 }
