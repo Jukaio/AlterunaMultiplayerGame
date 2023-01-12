@@ -9,6 +9,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 public class InputReplicationSystem : Synchronizable
 {
+    //TODO replacec this native hashmap stuff with the singleton ClientToEntityTranslator map
     struct ID : System.IEquatable<ID>
     {
         public ushort client;
