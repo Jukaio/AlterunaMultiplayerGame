@@ -9,27 +9,27 @@ using Unity.Collections.LowLevel.Unsafe;
 
 public class InputReplicationSystem : Synchronizable
 {
+    //TODO replacec this native hashmap stuff with the singleton ClientToEntityTranslator map
     struct ID : System.IEquatable<ID>
     {
         public ushort client;
-        public int entityIndex;
 
         public bool Equals(ID other)
         {
-            return client == other.client && entityIndex == other.entityIndex;
+            return client == other.client;
         }
     }
 
-    NativeHashMap<ID, Entity> _entityLookup;
+    NativeHashMap<ID, Entity> m_EntityLookup;
 
     private void Awake()
     {
-        _entityLookup = new NativeHashMap<ID, Entity>(1024, Allocator.Persistent);
+        m_EntityLookup = new NativeHashMap<ID, Entity>(1024, Allocator.Persistent);
     }
 
     private void OnDestroy()
     {
-        _entityLookup.Dispose();
+        m_EntityLookup.Dispose();
     }
 
     public override void AssembleData(Writer writer, byte LOD = 100)
@@ -41,42 +41,39 @@ public class InputReplicationSystem : Synchronizable
         var inputComps = query.ToComponentDataArray<InputComp>(Allocator.Temp);
         var clients = query.ToComponentDataArray<Player>(Allocator.Temp);
 
-        var entitesAsBytes = entities.Reinterpret<byte>(UnsafeUtility.SizeOf<byte>()).ToArray();
-        var clientsAsBytes = clients.Reinterpret<byte>(UnsafeUtility.SizeOf<byte>()).ToArray();
-        var inputCompsAsBytes = inputComps.Reinterpret<byte>(UnsafeUtility.SizeOf<byte>()).ToArray();
-
-        writer.Write(entitesAsBytes);
-        writer.Write(clientsAsBytes);
-        writer.Write(inputCompsAsBytes);
+        writer.Write(entities);
+        writer.Write(clients);
+        writer.Write(inputComps);
     }
 
     public override void DisassembleData(Reader reader, byte LOD = 100)
     {
-        var entitesAsBytes = reader.ReadByteArray();
-        NativeArray<byte> nativeEntitesAsBytes = new NativeArray<byte>(entitesAsBytes, Allocator.Temp);
-        var entites = nativeEntitesAsBytes.Reinterpret<Entity>(UnsafeUtility.SizeOf<Entity>());
 
-        var clientsAsBytes = reader.ReadByteArray();
-        NativeArray<byte> nativeClientsAsBytes = new NativeArray<byte>(clientsAsBytes, Allocator.Temp);
-        var clients = nativeClientsAsBytes.Reinterpret<Player>(UnsafeUtility.SizeOf<Player>());
-
-        var inputCompsAsBytes = reader.ReadByteArray();
-        NativeArray<byte> nativeInputCompsAsBytes = new NativeArray<byte>(inputCompsAsBytes, Allocator.Temp);
-        var inputComps = nativeInputCompsAsBytes.Reinterpret<InputComp>(UnsafeUtility.SizeOf<InputComp>());
+        var entites = reader.Read<Entity>();
+        var clients = reader.Read<Player>();
+        var inputComps = reader.Read<InputComp>();
 
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         for (int i = 0; i < entites.Length; i++)
         {
+            //TODO we do this ID thing to make sure that we get the correct entites on each client, however Right now I think there is a problem.
+            //mostlikley we dont actually populate the ID hashmap which means, we never find the correct entity and component
+            //Ok so clients are what seem to be consistent across network, there fore using teh clien we need to make sure that the correct entity gets set on each local version
             Entity oEntity;
             ID tempID;
-            tempID.entityIndex = entites[i].Index;
             tempID.client = clients[i].index;
 
-            if (_entityLookup.TryGetValue(tempID, out oEntity))
+            if (m_EntityLookup.TryGetValue(tempID, out oEntity))
             {
                 manager.SetComponentData(oEntity, inputComps[i]);
             }
         }
+    }
+
+    private void Update()
+    {
+        Commit();
+        base.SyncUpdate();
     }
 
 }

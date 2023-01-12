@@ -6,12 +6,6 @@ using Unity.Mathematics;
 using Unity.Collections;
 using UnityEngine.InputSystem;
 
-
-struct LocalPlayer : IComponentData
-{
-
-}
-
 public struct InputComp : IComponentData
 {
     public bool Forward;
@@ -44,7 +38,7 @@ public partial class LocalInputSystem : SystemBase
 
         query = new EntityQueryBuilder(Allocator.Temp)
            .WithAllRW<InputComp>()
-           .WithAll<LocalPlayer>()
+           .WithAll<Local>()
            .Build(ref CheckedStateRef);
         m_InputCompLookup = CheckedStateRef.GetComponentLookup<InputComp>();
     }

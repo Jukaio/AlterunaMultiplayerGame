@@ -37,7 +37,8 @@ public class PlayerClient : MonoBehaviour
     private void CreateUser(User user)
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Player), typeof(Velocity),typeof(Rotation));
+
+        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Player), typeof(Velocity),typeof(Rotation),typeof(InputComp));
         var e = manager.CreateEntity(clientArchetype);
         manager.SetComponentData(e, new Player { index = user.Index });
         manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
@@ -49,6 +50,15 @@ public class PlayerClient : MonoBehaviour
             manager.AddComponent<Remote>(e);
         }
         this.entity = e;
+
+        //TODO here we need to get the CLientToEntityTranslator and store the entity wiht the correct client locally
+       
+        //var query = manager.CreateEntityQuery(typeof(ClientToEntityTranslator));
+        //var lookup=query.chec
+        //for (int i = 0; i < length; i++)
+        //{
+
+        //}
     }
 
 }
