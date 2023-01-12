@@ -29,15 +29,22 @@ public class PlayerClient : MonoBehaviour
     public void OnPossess(User user)
     {
         CreateUser(user);
+
     }
 
     private void CreateUser(User user)
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Client), typeof(Velocity));
+        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Player), typeof(Velocity));
         var e = manager.CreateEntity(clientArchetype);
-        manager.AddComponentData(e, new Client { index = user.Index });
+        manager.AddComponentData(e, new Player { index = user.Index });
         manager.AddComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
+        if(avatar.IsMe) {
+            manager.AddComponent<Local>(e);
+        }
+        else {
+            manager.AddComponent<Remote>(e);
+        }
         this.entity = e;
     }
 

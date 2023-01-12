@@ -37,7 +37,6 @@ public partial struct RenderSystem : ISystem
             return;
         }
         var spriteLib = spriteLibQuery.GetSingleton<SpriteLibrary>();
-
         RenderParams renderParams = new(spriteLib.DefaultMaterial); // Material in here
         int count = Mathf.Min(1023, matrices.Length);
         Assert.IsTrue(matrices.Length < 1024, "Too many matrices");

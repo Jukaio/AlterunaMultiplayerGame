@@ -21,7 +21,7 @@ public partial struct InputToVelocitySystem : ISystem
     {
         query = new EntityQueryBuilder(Allocator.Temp)
             .WithAllRW<Velocity>()
-            .WithAll<Client>()
+            .WithAll<Player>()
             .Build(ref state);
         velocities = state.GetComponentLookup<Velocity>(false);
     }
@@ -37,7 +37,7 @@ public partial struct InputToVelocitySystem : ISystem
         velocities.Update(ref state);
 
         foreach (var entity in entities) {
-            velocities[entity] = new Velocity { value = math.float3(0.0f, 0.016f, 0.0f) };
+            //velocities[entity] = new Velocity { value = math.float3(0.0f, 0.016f, 0.0f) };
         }
     }
 }
@@ -56,9 +56,10 @@ public partial struct MovementSystem : ISystem
 
     public void OnUpdate(ref SystemState state)
     {
+        var dt = SystemAPI.Time.DeltaTime;
         EntityQuery query = new EntityQueryBuilder(Allocator.Temp)
             .WithAllRW<Position>()
-            .WithAll<Velocity, Client>()
+            .WithAll<Velocity, Local>()
             .Build(ref state);
 
         var entities = query.ToEntityArray(Allocator.Temp);
@@ -68,7 +69,7 @@ public partial struct MovementSystem : ISystem
         foreach (var entity in entities) {
             var pos = positions[entity].value;
             var vel = velocities[entity].value;
-            positions[entity] = new Position { value = pos + vel };
+            positions[entity] = new Position { value = pos + (vel * dt) };
         }
 
         Debug.Log("Update");

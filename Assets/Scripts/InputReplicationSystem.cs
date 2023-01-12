@@ -35,11 +35,11 @@ public class InputReplicationSystem : Synchronizable
     public override void AssembleData(Writer writer, byte LOD = 100)
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        var query = manager.CreateEntityQuery(typeof(InputComp), typeof(Client));
+        var query = manager.CreateEntityQuery(typeof(InputComp), typeof(Player));
 
         var entities = query.ToEntityArray(Allocator.Temp);
         var inputComps = query.ToComponentDataArray<InputComp>(Allocator.Temp);
-        var clients = query.ToComponentDataArray<Client>(Allocator.Temp);
+        var clients = query.ToComponentDataArray<Player>(Allocator.Temp);
 
         var entitesAsBytes = entities.Reinterpret<byte>(UnsafeUtility.SizeOf<byte>()).ToArray();
         var clientsAsBytes = clients.Reinterpret<byte>(UnsafeUtility.SizeOf<byte>()).ToArray();
@@ -58,7 +58,7 @@ public class InputReplicationSystem : Synchronizable
 
         var clientsAsBytes = reader.ReadByteArray();
         NativeArray<byte> nativeClientsAsBytes = new NativeArray<byte>(clientsAsBytes, Allocator.Temp);
-        var clients = nativeClientsAsBytes.Reinterpret<Client>(UnsafeUtility.SizeOf<Client>());
+        var clients = nativeClientsAsBytes.Reinterpret<Player>(UnsafeUtility.SizeOf<Player>());
 
         var inputCompsAsBytes = reader.ReadByteArray();
         NativeArray<byte> nativeInputCompsAsBytes = new NativeArray<byte>(inputCompsAsBytes, Allocator.Temp);

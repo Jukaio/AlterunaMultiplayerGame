@@ -32,7 +32,7 @@ public partial class LocalInputSystem : SystemBase
 
     protected override void OnDestroy()
     {
-        throw new System.NotImplementedException();
+        
     }
 
     protected override void OnCreate()
