@@ -6,7 +6,7 @@ using Alteruna;
 using Unity.Entities;
 using Unity.Collections;
 
-public struct Client : IComponentData
+public struct Player : IComponentData
 {
     public ushort index;
 }
@@ -16,9 +16,14 @@ public struct LocalInfo : IComponentData
     public ushort index;
 }
 
-public class MultiplayerService : MonoBehaviour
+public class MultiplayerService : MonoBehaviour, IComponentData
 {
     private Multiplayer multiplayer = null;
+
+    private void Awake()
+    {
+        World.DefaultGameObjectInjectionWorld.EntityManager.CreateSingleton(this, "Multiplayer Service");
+    }
 
     private void OnEnable()
     {
@@ -33,7 +38,6 @@ public class MultiplayerService : MonoBehaviour
         multiplayer.RoomJoined.AddListener(OnRoomJoin);
         multiplayer.RoomLeft.AddListener(OnRoomLeave);
         multiplayer.RoomListUpdated.AddListener(OnRoomUserListUpdate);
-        
     }
 
     private void OnDisable()
@@ -50,16 +54,6 @@ public class MultiplayerService : MonoBehaviour
         multiplayer.RoomListUpdated.RemoveListener(OnRoomUserListUpdate);
     }
 
-    private void CreateUser(ushort index)
-    {
-        //Debug.Log(ep);
-        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Client));
-        var e = manager.CreateEntity(clientArchetype);
-        manager.AddComponentData(e, new Client { index = index });
-        Debug.Log(manager.GetComponentData<Client>(e).index);
-        
-    }
 
     private void OnConnect(Multiplayer mp, Endpoint ep)
     {

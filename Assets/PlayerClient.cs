@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Entities;
 using Alteruna;
+using Unity.Collections;
+
 
 public class PlayerClient : MonoBehaviour
 {
@@ -29,34 +31,24 @@ public class PlayerClient : MonoBehaviour
     public void OnPossess(User user)
     {
         CreateUser(user);
+
     }
 
     private void CreateUser(User user)
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        EntityArchetype clientArchetype;
-        //this is how you check if the user is a local player
-        if (avatar.IsMe)
-        {
-            clientArchetype = manager.CreateArchetype(
-                typeof(Position),
-                typeof(Client),
-                typeof(Velocity),
-                typeof(InputComp),
-                typeof(LocalPlayer));  
-        }
-        else
-        {
-            clientArchetype = manager.CreateArchetype(
-                typeof(Position),
-                typeof(Client),
-                typeof(Velocity),
-                typeof(InputComp));
-        }
-
+        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Player), typeof(Velocity),typeof(Rotation),typeof(InputComp));
         var e = manager.CreateEntity(clientArchetype);
-        manager.SetComponentData(e, new Client { index = user.Index });
+        manager.SetComponentData(e, new Player { index = user.Index });
+        manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
+        manager.SetComponentData(e, new Rotation {value = 0.0f});
+        if(avatar.IsMe) {
+            manager.AddComponent<Local>(e);
+        }
+        else {
+            manager.AddComponent<Remote>(e);
+        }
         this.entity = e;
 
         //TODO here we need to get the CLientToEntityTranslator and store the entity wiht the correct client locally
