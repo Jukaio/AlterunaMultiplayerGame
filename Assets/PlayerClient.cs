@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Entities;
 using Alteruna;
+using Unity.Collections;
+
 
 public class PlayerClient : MonoBehaviour
 {
@@ -37,8 +39,8 @@ public class PlayerClient : MonoBehaviour
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Player), typeof(Velocity));
         var e = manager.CreateEntity(clientArchetype);
-        manager.AddComponentData(e, new Player { index = user.Index });
-        manager.AddComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
+        manager.SetComponentData(e, new Player { index = user.Index });
+        manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
         if(avatar.IsMe) {
             manager.AddComponent<Local>(e);
         }

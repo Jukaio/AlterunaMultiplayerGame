@@ -29,7 +29,9 @@ public class PlayerSynchroniser : Synchronizable
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         var query = manager.CreateEntityQuery(typeof(Position), typeof(Remote));
-       
+        //var singletonQuery = manager.CreateEntityQuery(typeof(MultiplayerService));
+        //var mp = singletonQuery.GetSingleton<MultiplayerService>();
+
         var positions = reader.Read<Position>();
         
         // This becomes valuable when we have more to sync :) 
