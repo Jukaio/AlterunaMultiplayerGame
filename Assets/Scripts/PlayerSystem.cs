@@ -41,16 +41,19 @@ public partial struct InputToVelocitySystem : ISystem
     public void OnUpdate(ref SystemState state)
     {   
         var manager = state.EntityManager;
-        
-        var inputQuery = manager.CreateEntityQuery(typeof(PlayerInput));
-        var input = inputQuery.GetSingleton<PlayerInput>();
-        
+
         var entities = query.ToEntityArray(Allocator.Temp);
         velocities.Update(ref state);
+        inputComps.Update(ref state);
         
+        
+        float speed = 0.01f;
 
-        foreach (var entity in entities) {
-            velocities[entity] = new Velocity { value = math.float3(0.0f, input.vertical, 0.0f) };
+        foreach (var entity in entities) 
+        {
+            var input = inputComps[entity];
+            var vel = (input.Forward ? speed : input.Back ? -speed : 0f)*speed;
+            velocities[entity] = new Velocity { value = math.float3(0.0f,vel, 0.0f) };
         }
     }
 }
@@ -58,13 +61,15 @@ public partial struct InputToRotationSystem : ISystem
 {
     EntityQuery query;
     ComponentLookup<Rotation> rotation;
+    ComponentLookup<InputComp> inputComps;
     public void OnCreate(ref SystemState state)
     {
         query = new EntityQueryBuilder(Allocator.Temp)
-            .WithAllRW<Rotation>()
+            .WithAllRW<Rotation,InputComp>()
             .WithAll<Local>()
             .Build(ref state);
         rotation = state.GetComponentLookup<Rotation>(false);
+        inputComps = state.GetComponentLookup<InputComp>(false);
     }
 
     public void OnDestroy(ref SystemState state)
@@ -77,14 +82,16 @@ public partial struct InputToRotationSystem : ISystem
         
         var manager = state.EntityManager;
         
-        var inputQuery = manager.CreateEntityQuery(typeof(PlayerInput));
-        var input = inputQuery.GetSingleton<PlayerInput>();
-        
         var entities = query.ToEntityArray(Allocator.Temp);
         rotation.Update(ref state);
-        
-        foreach (var entity in entities) {
-            rotation[entity] = new Rotation { value =  input.horizonal};
+        inputComps.Update(ref state);
+
+        float speed = 0.01f;
+        foreach (var entity in entities) 
+        {
+            var input = inputComps[entity];
+            var vel = (input.TurnRight ? speed : input.TurnLeft ? -speed : 0f) * speed;
+            rotation[entity] = new Rotation { value =  vel};
         }
     }
 }
