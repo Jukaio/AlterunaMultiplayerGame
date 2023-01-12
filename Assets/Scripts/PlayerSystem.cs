@@ -12,6 +12,11 @@ public struct Velocity : IComponentData
     public float3 value;
 }
 
+public struct Rotation : IComponentData
+{
+    public float value;
+}
+
 [UpdateBefore(typeof(MovementSystem))]
 public partial struct InputToVelocitySystem : ISystem
 {
@@ -33,11 +38,51 @@ public partial struct InputToVelocitySystem : ISystem
 
     public void OnUpdate(ref SystemState state)
     {   
+        var manager = state.EntityManager;
+        
+        var inputQuery = manager.CreateEntityQuery(typeof(PlayerInput));
+        var input = inputQuery.GetSingleton<PlayerInput>();
+        
         var entities = query.ToEntityArray(Allocator.Temp);
         velocities.Update(ref state);
+        
 
         foreach (var entity in entities) {
-            //velocities[entity] = new Velocity { value = math.float3(0.0f, 0.016f, 0.0f) };
+            velocities[entity] = new Velocity { value = math.float3(0.0f, input.vertical, 0.0f) };
+        }
+    }
+}
+public partial struct InputToRotationSystem : ISystem
+{
+    EntityQuery query;
+    ComponentLookup<Rotation> rotation;
+    public void OnCreate(ref SystemState state)
+    {
+        query = new EntityQueryBuilder(Allocator.Temp)
+            .WithAllRW<Rotation>()
+            .WithAll<Local>()
+            .Build(ref state);
+        rotation = state.GetComponentLookup<Rotation>(false);
+    }
+
+    public void OnDestroy(ref SystemState state)
+    {
+
+    }
+
+    public void OnUpdate(ref SystemState state)
+    {
+        
+        var manager = state.EntityManager;
+        
+        var inputQuery = manager.CreateEntityQuery(typeof(PlayerInput));
+        var input = inputQuery.GetSingleton<PlayerInput>();
+        
+        var entities = query.ToEntityArray(Allocator.Temp);
+        rotation.Update(ref state);
+        
+        foreach (var entity in entities) {
+            rotation[entity] = new Rotation { value =  input.horizonal};
         }
     }
 }
@@ -65,10 +110,12 @@ public partial struct MovementSystem : ISystem
         var entities = query.ToEntityArray(Allocator.Temp);
         var positions = state.GetComponentLookup<Position>(false);
         var velocities = state.GetComponentLookup<Velocity>(false);
+        var rotation = state.GetComponentLookup<Rotation>(false);
 
         foreach (var entity in entities) {
             var pos = positions[entity].value;
             var vel = velocities[entity].value;
+            var oldRot = rotation[entity].value;
             positions[entity] = new Position { value = pos + (vel * dt) };
         }
 

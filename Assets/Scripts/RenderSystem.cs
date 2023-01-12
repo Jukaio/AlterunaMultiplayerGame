@@ -29,8 +29,8 @@ public partial struct RenderSystem : ISystem
     {
         // SystemAPI is single threaded
         NativeList<Matrix4x4> matrices = new(Allocator.Temp);
-        foreach (var position in SystemAPI.Query<Position>().WithAll<Player>()) {
-            var matrix = Matrix4x4.TRS(position.value, Quaternion.identity, Vector3.one);
+        foreach (var (position,rotation) in SystemAPI.Query<Position,Rotation>().WithAll<Player>()) {
+            var matrix = Matrix4x4.TRS(position.value, Quaternion.Euler(0,0,rotation.value), Vector3.one);
             matrices.Add(matrix);
         }
         if (matrices.IsEmpty) {
