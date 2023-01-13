@@ -49,6 +49,7 @@ public partial struct UpdateColliderSystem : ISystem
         m_PositionLookup.Update(ref state);
         m_SizeLookup.Update(ref state);
         m_ColliderCompLookup.Update(ref state);
+
         foreach (var entity in entities)
         {
             ColliderComp col = new ColliderComp();
@@ -60,25 +61,51 @@ public partial struct UpdateColliderSystem : ISystem
 }
 
 
-//TODO might want to implement a quadtree for the skae of effiency when checking collisions
+
 public partial struct CollisionSystem : ISystem
 {
 
     private EntityQuery query;
-    private ComponentLookup<Position> m_PositionLookup;
+    private ComponentLookup<ColliderComp> m_ColliderCompLookup;
 
+    //TODO check if we should only collide with locals or if remotes are fine too
     public void OnCreate(ref SystemState state)
     {
-        throw new System.NotImplementedException();
+        query = new EntityQueryBuilder(Allocator.Temp)
+         .WithAllRW<ColliderComp>()
+         .Build(ref state);
+    
+        m_ColliderCompLookup = state.GetComponentLookup<ColliderComp>();
     }
 
     public void OnDestroy(ref SystemState state)
     {
-        throw new System.NotImplementedException();
+        
     }
 
     public void OnUpdate(ref SystemState state)
     {
-        throw new System.NotImplementedException();
+        var entities = query.ToEntityArray(Allocator.Temp);
+        m_ColliderCompLookup.Update(ref state);
+
+        //TODO might want to implement a quadtree for the skae of effiency when checking collisions, instead of checking against all in world
+        foreach (var entityA in entities)
+        {
+            foreach (var entityB in entities)
+            {
+                if (entityA == entityB) { continue; }
+
+                var aMin=m_ColliderCompLookup[entityA].Min;
+                var aMax=m_ColliderCompLookup[entityA].Max;
+
+                var bMin = m_ColliderCompLookup[entityB].Min;
+                var bMax = m_ColliderCompLookup[entityB].Max;
+
+                if (aMax.x >= bMin.x && aMin.x <= bMax.x && aMax.y >= bMin.y && aMin.y <= bMax.y)
+                {
+                   //TODO Create collision order
+                }
+            }
+        }
     }
 }
