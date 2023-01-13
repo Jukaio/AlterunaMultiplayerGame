@@ -51,14 +51,13 @@ public class PlayerClient : MonoBehaviour
         }
         this.entity = e;
 
-        //TODO here we need to get the CLientToEntityTranslator and store the entity wiht the correct client locally
-       
-        //var query = manager.CreateEntityQuery(typeof(ClientToEntityTranslator));
-        //var lookup=query.chec
-        //for (int i = 0; i < length; i++)
-        //{
-
-        //}
+        //Adds the new entity to the local translator hashmap with the key of user index 
+        var query = manager.CreateEntityQuery(typeof(ClientToEntityTranslator));
+        var translators=query.ToComponentArray<ClientToEntityTranslator>();
+        for (int i = 0; i < translators.Length; i++)
+        {
+            translators[i].ClientEntityMap.Add(user.Index, e);
+        }
     }
 
 }
