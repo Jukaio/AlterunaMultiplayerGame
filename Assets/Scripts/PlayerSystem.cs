@@ -23,14 +23,17 @@ public partial struct InputToVelocitySystem : ISystem
     EntityQuery query;
     ComponentLookup<Velocity> velocities;
     ComponentLookup<InputComp> inputComps;
+    ComponentLookup<Rotation> rotations;
     public void OnCreate(ref SystemState state)
     {
         query = new EntityQueryBuilder(Allocator.Temp)
             .WithAllRW<Velocity,InputComp>()
+            .WithAllRW<Rotation>()
             .WithAll<Player>()
             .Build(ref state);
         velocities = state.GetComponentLookup<Velocity>(false);
         inputComps = state.GetComponentLookup<InputComp>(false);
+        rotations = state.GetComponentLookup<Rotation>(false);
     }
 
     public void OnDestroy(ref SystemState state)
@@ -45,15 +48,16 @@ public partial struct InputToVelocitySystem : ISystem
         var entities = query.ToEntityArray(Allocator.Temp);
         velocities.Update(ref state);
         inputComps.Update(ref state);
+        rotations.Update(ref state);
         
-        
-        float speed = 1f;
+        float speed = 3f;
 
         foreach (var entity in entities) 
         {
             var input = inputComps[entity];
-            var vel = (input.Forward ? speed : input.Back ? -speed : 0f);
-            velocities[entity] = new Velocity { value = math.float3(0.0f,vel, 0.0f) };
+            var vel = (input.Forward ? speed : input.Back ? -speed : 0f);        
+            var quat = Quaternion.Euler(0, 0, rotations[entity].value);
+            velocities[entity] = new Velocity { value =  math.rotate(quat, vel) };
         }
     }
 }
