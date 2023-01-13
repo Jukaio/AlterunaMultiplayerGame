@@ -60,7 +60,7 @@ public partial struct UpdateColliderSystem : ISystem
 }
 
 
-
+[UpdateBefore(typeof(CollisionOrderSystem))]
 public partial struct CollisionSystem : ISystem
 {
 
@@ -90,11 +90,11 @@ public partial struct CollisionSystem : ISystem
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         var orderQuery = manager.CreateEntityQuery(typeof(CollisisonOrderQueue));
 
-        var arr = query.ToComponentArray<CollisisonOrderQueue>();
+        var arr = orderQuery.ToComponentArray<CollisisonOrderQueue>();
         if (arr.Length == 0) { return; }
         var orderQueue = arr[0].Queue;
 
-        //TODO might want to implement a quadtree for the skae of effiency when checking collisions, instead of checking against all in world
+        //TODO might want to implement a quadtree for the sake of effiency when checking collisions, instead of checking against all in world
         foreach (var entityA in entities)
         {
             foreach (var entityB in entities)
@@ -114,5 +114,30 @@ public partial struct CollisionSystem : ISystem
                 }
             }
         }
+    }
+}
+
+public partial struct CollisionOrderSystem : ISystem
+{
+    public void OnCreate(ref SystemState state)
+    {
+        
+    }
+
+    public void OnDestroy(ref SystemState state)
+    {
+        
+    }
+
+    public void OnUpdate(ref SystemState state)
+    {
+        //TODO take care of all orders in CollsionOrderQueue and apply whatever is suposed to happen to entites
+
+        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        var orderQuery = manager.CreateEntityQuery(typeof(CollisisonOrderQueue));
+
+        var arr = orderQuery.ToComponentArray<CollisisonOrderQueue>();
+        if (arr.Length == 0) { return; }
+        var orderQueue = arr[0].Queue;
     }
 }
