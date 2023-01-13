@@ -8,15 +8,15 @@ using Unity.Collections;
 
 
 
-public class ClientToEntityTranslator : MonoBehaviour, IComponentData
+public class UserToEntityTranslator : MonoBehaviour, IComponentData
 {
-    public NativeHashMap<int,Entity> ClientEntityMap;
-    // Start is called before the first frame update
+    public NativeHashMap<ushort,Entity> ClientEntityMap;
+
     void Start()
     {
-        ClientEntityMap = new NativeHashMap<int, Entity>(1024, Allocator.Persistent);
+        ClientEntityMap = new NativeHashMap<ushort, Entity>(1024, Allocator.Persistent);
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        _ = manager.CreateSingleton(this, "Client To Entity Translator");
+        _ = manager.CreateSingleton(this, "User To Entity Translator");
     }
 
     private void OnDestroy()
