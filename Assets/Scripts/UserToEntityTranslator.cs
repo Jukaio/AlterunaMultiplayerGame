@@ -16,7 +16,7 @@ public class UserToEntityTranslator : MonoBehaviour, IComponentData
     {
         ClientEntityMap = new NativeHashMap<ushort, Entity>(1024, Allocator.Persistent);
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        _ = manager.CreateSingleton(this, "Client To Entity Translator");
+        _ = manager.CreateSingleton(this, "User To Entity Translator");
     }
 
     private void OnDestroy()
