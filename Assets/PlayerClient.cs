@@ -52,8 +52,8 @@ public class PlayerClient : MonoBehaviour
         this.entity = e;
 
         //Adds the new entity to the local translator hashmap with the key of user index 
-        var query = manager.CreateEntityQuery(typeof(ClientToEntityTranslator));
-        var translators=query.ToComponentArray<ClientToEntityTranslator>();
+        var query = manager.CreateEntityQuery(typeof(UserToEntityTranslator));
+        var translators=query.ToComponentArray<UserToEntityTranslator>();
         for (int i = 0; i < translators.Length; i++)
         {
             translators[i].ClientEntityMap.Add(user.Index, e);

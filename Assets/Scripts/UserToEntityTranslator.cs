@@ -8,7 +8,7 @@ using Unity.Collections;
 
 
 
-public class ClientToEntityTranslator : MonoBehaviour, IComponentData
+public class UserToEntityTranslator : MonoBehaviour, IComponentData
 {
     public NativeHashMap<ushort,Entity> ClientEntityMap;
 

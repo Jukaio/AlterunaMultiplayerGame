@@ -32,8 +32,8 @@ public class InputReplicationSystem : Synchronizable
         var inputComps = reader.Read<InputComp>();
 
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        var query = manager.CreateEntityQuery(typeof(ClientToEntityTranslator));
-        var translators = query.ToComponentArray<ClientToEntityTranslator>();
+        var query = manager.CreateEntityQuery(typeof(UserToEntityTranslator));
+        var translators = query.ToComponentArray<UserToEntityTranslator>();
 
         for (int i = 0; i < entites.Length; i++)
         {
