@@ -4,12 +4,71 @@ using UnityEngine;
 using Unity.Entities;
 using UnityEngine.InputSystem;
 using Unity.Mathematics;
+using Unity.Entities.CodeGeneratedJobForEach;
+using Unity.Collections;
+
+public struct Bullet : IComponentData
+{
+    public Entity owner;
+}
 
 public partial struct ShootingSystem : ISystem
 {
+    private EntityQuery playerQuery;
+    private EntityArchetype bulletArchetype;
+    private ComponentLookup<Position> positions;
+    private ComponentLookup<Rotation> rotations;
+
     public void OnCreate(ref SystemState state)
     {
+        positions = state.GetComponentLookup<Position>();
+        rotations = state.GetComponentLookup<Rotation>();
+        playerQuery = state.GetEntityQuery(typeof(Player), typeof(Position), typeof(Rotation), typeof(Local));
+        bulletArchetype = state.EntityManager.CreateArchetype(typeof(Bullet), typeof(Position), typeof(Local), typeof(Velocity));
+    }
 
+    public void OnDestroy(ref SystemState state)
+    {
+        
+    }
+
+    public void OnUpdate(ref SystemState state)
+    {
+        var manager = state.EntityManager;
+        var players = playerQuery.ToEntityArray(Allocator.Temp);
+
+        positions.Update(ref state);
+        rotations.Update(ref state);
+
+        foreach(var player in players) {
+            // TODO: Implement input component 
+            if (Keyboard.current[Key.Space].wasPressedThisFrame) {
+                var angle = rotations[player].radians;
+                var direction = math.float3(math.cos(angle), math.sin(angle), 0.0f);
+
+                var position = positions[player];
+                var bullet = manager.CreateEntity(bulletArchetype);
+                manager.SetComponentData(bullet, position);
+                manager.SetComponentData(bullet, new Velocity { value = direction * 10.0f });
+                manager.SetComponentData(bullet, new Bullet { owner = player });
+            }
+        }
+    }
+}
+
+public partial struct BulletCleanupSystem : ISystem
+{
+    //private EntityQuery playerQuery;
+    private EntityQuery bulletQuery;
+    private ComponentLookup<Bullet> bullets;
+    private ComponentLookup<Position> positions;
+
+    public void OnCreate(ref SystemState state)
+    {
+        positions = state.GetComponentLookup<Position>();
+        bullets = state.GetComponentLookup<Bullet>();
+        bulletQuery = state.GetEntityQuery(typeof(Bullet), typeof(Position), typeof(Local));
+        //playerQuery = state.GetEntityQuery(typeof(Player), typeof(Position), typeof(Local));
     }
 
     public void OnDestroy(ref SystemState state)
@@ -19,10 +78,20 @@ public partial struct ShootingSystem : ISystem
 
     public void OnUpdate(ref SystemState state)
     {
-        var archetype = state.EntityManager.CreateArchetype(typeof(Position), typeof(Local), typeof(Velocity));
-        if(Keyboard.current[Key.Space].wasPressedThisFrame) {
-            var bullet = state.EntityManager.CreateEntity(archetype);
-            state.EntityManager.SetComponentData(bullet, new Velocity { value = math.float3(0.0f, 1.0f, 0.0f) });
+        positions.Update(ref state);
+        bullets.Update(ref state);
+        var bulletEntities = bulletQuery.ToEntityArray(Allocator.Temp);
+
+        var destroyList = new NativeList<Entity>(Allocator.Temp);
+        foreach(var bullet in bulletEntities) {
+            var bulletPosition = positions[bullet];
+            var playerPosition = positions[bullets[bullet].owner];
+            if(math.distance(bulletPosition.value, playerPosition.value) >= 5.0f) {
+                destroyList.Add(bullet);
+            }
+        }
+        foreach(var bullet in destroyList) {
+            state.EntityManager.DestroyEntity(bullet);
         }
     }
 }

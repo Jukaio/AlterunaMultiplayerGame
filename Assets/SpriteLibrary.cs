@@ -11,8 +11,12 @@ public class SpriteLibrary : MonoBehaviour, IComponentData
     [SerializeField]
     private Material defaultMaterial;
 
+    [SerializeField]
+    private Material bulletMaterial;
+
     public Mesh Mesh => quadMesh;
     public Material DefaultMaterial => defaultMaterial;
+    public Material BulletMaterial => bulletMaterial;
 
 
     void Start()

@@ -62,7 +62,7 @@ public partial struct RenderSmallSystem : ISystem
     {
         // SystemAPI is single threaded
         NativeList<Matrix4x4> matrices = new(Allocator.Temp);
-        foreach (var position in SystemAPI.Query<Position>().WithNone<Player>()) {
+        foreach (var position in SystemAPI.Query<Position>().WithAll<Bullet>()) {
             var matrix = Matrix4x4.TRS(position.value, Quaternion.identity, Vector3.one * 0.5f);
             matrices.Add(matrix);
         }
@@ -70,7 +70,7 @@ public partial struct RenderSmallSystem : ISystem
             return;
         }
         var spriteLib = spriteLibQuery.GetSingleton<SpriteLibrary>();
-        RenderParams renderParams = new(spriteLib.DefaultMaterial); // Material in here
+        RenderParams renderParams = new(spriteLib.BulletMaterial); // Material in here
         int count = Mathf.Min(1023, matrices.Length);
         Assert.IsTrue(matrices.Length < 1024, "Too many matrices");
         Graphics.RenderMeshInstanced(renderParams, spriteLib.Mesh, 0, matrices.AsArray(), count);
