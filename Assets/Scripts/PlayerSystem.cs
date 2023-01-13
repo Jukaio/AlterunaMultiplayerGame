@@ -57,7 +57,7 @@ public partial struct InputToVelocitySystem : ISystem
             var input = inputComps[entity];
             var vel = (input.Forward ? speed : input.Back ? -speed : 0f);        
             var quat = Quaternion.Euler(0, 0, rotations[entity].value);
-            velocities[entity] = new Velocity { value =  math.rotate(quat, vel) };
+            velocities[entity] = new Velocity { value =  math.rotate(quat, math.up() * vel) };
         }
     }
 }
