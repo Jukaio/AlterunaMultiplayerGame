@@ -7,7 +7,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
 
-public class InputReplicationSystem : Synchronizable
+public class InputReplicationSynchronizer : Synchronizable
 {
 
     public override void AssembleData(Writer writer, byte LOD = 100)
