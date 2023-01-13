@@ -9,28 +9,6 @@ using Unity.Collections.LowLevel.Unsafe;
 
 public class InputReplicationSystem : Synchronizable
 {
-    //TODO replacec this native hashmap stuff with the singleton ClientToEntityTranslator map
-    struct ID : System.IEquatable<ID>
-    {
-        public ushort client;
-
-        public bool Equals(ID other)
-        {
-            return client == other.client;
-        }
-    }
-
-    NativeHashMap<ID, Entity> m_EntityLookup;
-
-    private void Awake()
-    {
-        m_EntityLookup = new NativeHashMap<ID, Entity>(1024, Allocator.Persistent);
-    }
-
-    private void OnDestroy()
-    {
-        m_EntityLookup.Dispose();
-    }
 
     public override void AssembleData(Writer writer, byte LOD = 100)
     {
@@ -54,19 +32,20 @@ public class InputReplicationSystem : Synchronizable
         var inputComps = reader.Read<InputComp>();
 
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        var query = manager.CreateEntityQuery(typeof(ClientToEntityTranslator));
+        var translators = query.ToComponentArray<ClientToEntityTranslator>();
+
         for (int i = 0; i < entites.Length; i++)
         {
-            //TODO we do this ID thing to make sure that we get the correct entites on each client, however Right now I think there is a problem.
-            //mostlikley we dont actually populate the ID hashmap which means, we never find the correct entity and component
-            //Ok so clients are what seem to be consistent across network, there fore using teh clien we need to make sure that the correct entity gets set on each local version
-            Entity oEntity;
-            ID tempID;
-            tempID.client = clients[i].index;
-
-            if (m_EntityLookup.TryGetValue(tempID, out oEntity))
+            for (int j = 0; j < translators.Length; j++)
             {
-                manager.SetComponentData(oEntity, inputComps[i]);
+                Entity oEntity;
+                if (translators[j].ClientEntityMap.TryGetValue(clients[i].index, out oEntity))
+                {
+                    manager.SetComponentData(oEntity, inputComps[i]);
+                }
             }
+
         }
     }
 
