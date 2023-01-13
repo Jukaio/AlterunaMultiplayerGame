@@ -5,18 +5,17 @@ using Unity.Entities;
 using UnityEngine;
 using Unity.Mathematics;
 
-//TODO add a component for AABB  collisions
-
-struct SizeComp : IComponentData
+public struct SizeComp : IComponentData
 {
     public float2 size;
 }
 
-struct ColliderComp : IComponentData
+public struct ColliderComp : IComponentData
 {
     public float2 Min;
     public float2 Max;
 }
+
 
 [UpdateBefore(typeof(CollisionSystem))]
 public partial struct UpdateColliderSystem : ISystem
@@ -88,6 +87,13 @@ public partial struct CollisionSystem : ISystem
         var entities = query.ToEntityArray(Allocator.Temp);
         m_ColliderCompLookup.Update(ref state);
 
+        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        var orderQuery = manager.CreateEntityQuery(typeof(CollisisonOrderQueue));
+
+        var arr = query.ToComponentArray<CollisisonOrderQueue>();
+        if (arr.Length == 0) { return; }
+        var orderQueue = arr[0].Queue;
+
         //TODO might want to implement a quadtree for the skae of effiency when checking collisions, instead of checking against all in world
         foreach (var entityA in entities)
         {
@@ -103,7 +109,8 @@ public partial struct CollisionSystem : ISystem
 
                 if (aMax.x >= bMin.x && aMin.x <= bMax.x && aMax.y >= bMin.y && aMin.y <= bMax.y)
                 {
-                   //TODO Create collision order
+                   //TODO Make sure that duplicate collision orders don't get added
+                   orderQueue.Enqueue(new CollisionOrder(entityA, entityB));
                 }
             }
         }
