@@ -38,11 +38,21 @@ public class PlayerClient : MonoBehaviour
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Player), typeof(Velocity),typeof(Rotation),typeof(InputComp));
+        var clientArchetype = manager.CreateArchetype(
+            typeof(Position),
+            typeof(Player),
+            typeof(Velocity),
+            typeof(Rotation),
+            typeof(InputComp),
+            typeof(SizeComp),
+            typeof(ColliderComp));
+
         var e = manager.CreateEntity(clientArchetype);
         manager.SetComponentData(e, new Player { index = user.Index });
         manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
         manager.SetComponentData(e, new Rotation {value = 0.0f});
+        manager.SetComponentData(e, new SizeComp { size = 1f });
+
         if(avatar.IsMe) {
             manager.AddComponent<Local>(e);
         }
