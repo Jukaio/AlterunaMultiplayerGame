@@ -2,19 +2,6 @@ using UnityEngine;
 using Unity.Collections;
 using Unity.Entities;
 
-
-public struct CollisionOrder
-{
-    public CollisionOrder(Entity a, Entity b)
-    {
-        A = a;
-        B = b;
-    }
-
-    public Entity A;
-    public Entity B;
-};
-
 public class CollisisonOrderQueue : MonoBehaviour, IComponentData
 {
     public NativeQueue<CollisionOrder> Queue;
@@ -31,4 +18,17 @@ public class CollisisonOrderQueue : MonoBehaviour, IComponentData
         Queue.Dispose();
     }
 }
+
+public struct CollisionOrder
+{
+    public CollisionOrder(Entity a, Entity b)
+    {
+        A = a;
+        B = b;
+    }
+
+    public Entity A;
+    public Entity B;
+};
+
 
