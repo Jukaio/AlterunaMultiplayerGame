@@ -8,7 +8,7 @@ public class CollisisonOrderQueue : MonoBehaviour, IComponentData
 
     void Start()
     {
-        Queue = new NativeQueue<CollisionOrder>();
+        Queue = new NativeQueue<CollisionOrder>(Allocator.Persistent);
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         _ = manager.CreateSingleton(this, "Collision Order Queue");
     }
