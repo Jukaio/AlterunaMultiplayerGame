@@ -6,6 +6,7 @@ using Alteruna;
 using Unity.Entities;
 using Unity.Collections;
 
+//TODO whenever a new ID is used to spawn something thie should add a entry to the hashmap with the id and entity
 public class IDToEntityTranslator : MonoBehaviour, IComponentData
 {
     public NativeHashMap<uint, Entity> IDEntityMap;
