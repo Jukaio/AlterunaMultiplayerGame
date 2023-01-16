@@ -7,6 +7,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
 //TODO this class is intended to keep track of used IDs and sync them across game instances
+//TODO when spawning stuff we should request an id that we then send with the RPC to all other remote clients when doing the spawn request
 public class IDSyncer : Synchronizable
 {
 
