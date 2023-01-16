@@ -73,13 +73,13 @@ public partial struct CollisionSystem : ISystem
         query = new EntityQueryBuilder(Allocator.Temp)
          .WithAllRW<ColliderComp>()
          .Build(ref state);
-    
+
         m_ColliderCompLookup = state.GetComponentLookup<ColliderComp>();
     }
 
     public void OnDestroy(ref SystemState state)
     {
-        
+
     }
 
     public void OnUpdate(ref SystemState state)
@@ -101,19 +101,33 @@ public partial struct CollisionSystem : ISystem
             {
                 if (entityA == entityB) { continue; }
 
-                var aMin=m_ColliderCompLookup[entityA].Min;
-                var aMax=m_ColliderCompLookup[entityA].Max;
+                var aMin = m_ColliderCompLookup[entityA].Min;
+                var aMax = m_ColliderCompLookup[entityA].Max;
 
                 var bMin = m_ColliderCompLookup[entityB].Min;
                 var bMax = m_ColliderCompLookup[entityB].Max;
 
                 if (aMax.x >= bMin.x && aMin.x <= bMax.x && aMax.y >= bMin.y && aMin.y <= bMax.y)
                 {
-                   //TODO Make sure that duplicate collision orders don't get added
-                   orderQueue.Enqueue(new CollisionOrder(entityA, entityB));
+                    var newOrder = new CollisionOrder(entityA, entityB);
+                    //TODO Make sure that duplicate collision orders don't get added
+                    if (orderQueue.Count > 0)
+                    {
+                        var orderArray = orderQueue.ToArray(Allocator.Temp);
+                        foreach (var currentOrder in orderArray)
+                        {
+                            if(SameCollision(currentOrder, newOrder)) { continue; }
+                        }
+                    }
+                    orderQueue.Enqueue(newOrder);
                 }
             }
         }
+    }
+
+    private static bool SameCollision(CollisionOrder currentOrder ,CollisionOrder newOrder)
+    {
+        return (currentOrder.A ==newOrder.A && currentOrder.B == newOrder.B) || (currentOrder.B == newOrder.A && currentOrder.A == newOrder.B);
     }
 }
 
@@ -121,12 +135,12 @@ public partial struct CollisionOrderSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
-        
+
     }
 
     public void OnDestroy(ref SystemState state)
     {
-        
+
     }
 
     public void OnUpdate(ref SystemState state)
@@ -139,5 +153,12 @@ public partial struct CollisionOrderSystem : ISystem
         var arr = orderQuery.ToComponentArray<CollisisonOrderQueue>();
         if (arr.Length == 0) { return; }
         var orderQueue = arr[0].Queue;
+
+        while (!orderQueue.IsEmpty())
+        {
+            var order = orderQueue.Dequeue();
+
+            Debug.Log("Entity: " + order.A.ToString() + " collided with Entity: " + order.B.ToString());
+        }
     }
 }
