@@ -11,8 +11,8 @@ public struct CollisionOrder
         B = b;
     }
 
-    Entity A;
-    Entity B;
+    public Entity A;
+    public Entity B;
 };
 
 public class CollisisonOrderQueue : MonoBehaviour, IComponentData
