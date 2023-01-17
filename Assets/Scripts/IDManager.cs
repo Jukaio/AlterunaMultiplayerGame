@@ -42,8 +42,8 @@ public class IDManager : MonoBehaviour, IComponentData
 
     void Start()
     {
-        m_AvailableIDs = new NativeQueue<uint>(Allocator.Temp);
-        m_InUseIDs = new NativeHashSet<uint>(1024, Allocator.Temp);
+        m_AvailableIDs = new NativeQueue<uint>(Allocator.Persistent);
+        m_InUseIDs = new NativeHashSet<uint>(1024, Allocator.Persistent);
 
         for (uint i = 0; i < 1024; ++i)
         {
