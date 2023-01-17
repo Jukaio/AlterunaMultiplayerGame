@@ -5,6 +5,11 @@ using Unity.Entities;
 using UnityEngine.InputSystem;
 using Unity.Mathematics;
 
+public struct SyncID : IComponentData
+{
+    public uint value;
+}
+
 public class EntitySpawner : MonoBehaviour, IComponentData
 {
     // Start is called before the first frame update
