@@ -29,7 +29,7 @@ public class EntitySpawner : MonoBehaviour, IComponentData
         manager.AddComponent(entity, typeof(SyncID));
         manager.SetComponentData(entity, new SyncID { value = syncID });
    
-        var query = manager.CreateEntityQuery(typeof(UserToEntityTranslator));
+        var query = manager.CreateEntityQuery(typeof(IDToEntityTranslator));
 
         var arr = query.ToComponentArray<IDToEntityTranslator>();
         if (arr.Length != 0) 
