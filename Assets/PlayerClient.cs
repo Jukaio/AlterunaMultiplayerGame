@@ -45,17 +45,51 @@ public class PlayerClient : MonoBehaviour
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Player), typeof(Velocity),typeof(Rotation),typeof(InputComp));
-        var e = manager.CreateEntity(clientArchetype);
+        var clientArchetype = manager.CreateArchetype(
+            typeof(Position),
+            typeof(Player),
+            typeof(Velocity),
+            typeof(Rotation),
+            typeof(InputComp),
+            typeof(SizeComp),
+            typeof(ColliderComp));
+
+
+        var spawnQuery = manager.CreateEntityQuery(typeof(EntitySpawner));
+        var spawner = spawnQuery.GetSingleton<EntitySpawner>();
+
+        var idQuery = manager.CreateEntityQuery(typeof(IDManager));
+        var idManager = idQuery.GetSingleton<IDManager>();
+        uint syncID;
+
+        if (avatar.IsMe)
+        {
+            syncID = idManager.RequestID();
+        }
+        else
+        {
+            syncID = idManager.GetLastRequestedID();
+        }
+
+        var e = spawner.SpawnEntity(syncID, manager, clientArchetype); //manager.CreateEntity(clientArchetype);
         manager.SetComponentData(e, new Player { index = user.Index });
-        manager.SetComponentData(e, new Velocity { value = math.float3(0.0f, 0.0f, 0.0f) });
-        manager.SetComponentData(e, new Rotation {value = 0.0f});
-        if(avatar.IsMe) {
+        manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
+        manager.SetComponentData(e, new Rotation { value = 0.0f });
+        manager.SetComponentData(e, new SizeComp { size = 1f });
+
+        if (avatar.IsMe)
+        {
             manager.AddComponent<Local>(e);
         }
-        else {
+        else
+        {
             manager.AddComponent<Remote>(e);
         }
         this.entity = e;
+
+        //Adds the new entity to the local translator hashmap with the key of user index 
+        var translatorQuery = manager.CreateEntityQuery(typeof(UserToEntityTranslator));
+        var translator = translatorQuery.GetSingleton<UserToEntityTranslator>();
+        translator.ClientEntityMap.Add(user.Index, e);
     }
 }
