@@ -21,9 +21,8 @@ public class EntitySpawner : MonoBehaviour, IComponentData
     }
 
     //TODO check if this needs to be called on each instance via RPC
-    public Entity SpawnEntity(uint syncID, ref SystemState state, EntityArchetype archetype)
+    public Entity SpawnEntity(uint syncID, EntityManager manager, EntityArchetype archetype)
     {
-        var manager = state.EntityManager;
 
         var entity = manager.CreateEntity(archetype);
         manager.AddComponent(entity, typeof(SyncID));
