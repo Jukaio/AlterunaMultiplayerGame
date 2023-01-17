@@ -42,6 +42,7 @@ public class IDManager : MonoBehaviour, IComponentData
 
     void Start()
     {
+        //TODO for some reason wether these allocators are persistent or not is affecting how many entities get spawned when players join a room.
         m_AvailableIDs = new NativeQueue<uint>(Allocator.Persistent);
         m_InUseIDs = new NativeHashSet<uint>(1024, Allocator.Persistent);
 
