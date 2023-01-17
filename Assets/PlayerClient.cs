@@ -47,27 +47,43 @@ public class PlayerClient : MonoBehaviour
             typeof(SizeComp),
             typeof(ColliderComp));
 
-        var e = manager.CreateEntity(clientArchetype);
+
+        var spawnQuery = manager.CreateEntityQuery(typeof(EntitySpawner));
+        var spawner = spawnQuery.GetSingleton<EntitySpawner>();
+
+        var syncQuery = manager.CreateEntityQuery(typeof(IDSyncer));
+        var syncer = syncQuery.GetSingleton<IDSyncer>();
+        uint syncID;
+
+        if (avatar.IsMe)
+        {
+            syncID = syncer.RequestID();
+        }
+        else
+        {
+            syncID = syncer.GetLastRequestedID();
+        }
+
+        var e = spawner.SpawnEntity(syncID, manager, clientArchetype); //manager.CreateEntity(clientArchetype);
         manager.SetComponentData(e, new Player { index = user.Index });
         manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
-        manager.SetComponentData(e, new Rotation {value = 0.0f});
+        manager.SetComponentData(e, new Rotation { value = 0.0f });
         manager.SetComponentData(e, new SizeComp { size = 1f });
 
-        if(avatar.IsMe) {
+        if (avatar.IsMe)
+        {
             manager.AddComponent<Local>(e);
         }
-        else {
+        else
+        {
             manager.AddComponent<Remote>(e);
         }
         this.entity = e;
 
         //Adds the new entity to the local translator hashmap with the key of user index 
-        var query = manager.CreateEntityQuery(typeof(UserToEntityTranslator));
-        var translators=query.ToComponentArray<UserToEntityTranslator>();
-        for (int i = 0; i < translators.Length; i++)
-        {
-            translators[i].ClientEntityMap.Add(user.Index, e);
-        }
+        var translatorQuery = manager.CreateEntityQuery(typeof(UserToEntityTranslator));
+        var translator = translatorQuery.GetSingleton<UserToEntityTranslator>();
+        translator.ClientEntityMap.Add(user.Index, e);
     }
 
 }
