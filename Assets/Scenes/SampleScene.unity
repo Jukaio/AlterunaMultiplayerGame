@@ -507,6 +507,7 @@ GameObject:
   - component: {fileID: 552908349}
   - component: {fileID: 552908352}
   - component: {fileID: 552908351}
+  - component: {fileID: 552908353}
   m_Layer: 0
   m_Name: EntityTranslator
   m_TagString: Untagged
@@ -565,6 +566,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87687e7bb11054149ad386f787db504e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &552908353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 552908348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 355271481f055da43997a7f2b65943dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_LastRequestID: 0
+  m_OLDLastRequestID: 0
+  m_LastReleasedID: 0
+  m_OLDLastReleasedID: 0
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
