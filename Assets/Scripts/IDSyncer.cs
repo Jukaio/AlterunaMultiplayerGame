@@ -10,45 +10,18 @@ using Unity.Collections.LowLevel.Unsafe;
 
 //TODO this class is intended to keep track of used IDs and sync them across game instances
 //TODO when spawning stuff we should request an id that we then send with the RPC to all other remote clients when doing the spawn request
-public class IDSyncer : Synchronizable, IComponentData
+public class IDSyncer : Synchronizable
 {
+    IDManager m_IDManager;
 
-    NativeQueue<uint> m_AvailableIDs;
-    NativeHashSet<uint> m_InUseIDs;
-
-
-    uint m_LastRequestID = 0;
-    uint m_OLDLastRequestID = 0;
-
-    uint m_LastReleasedID = 0;
-    uint m_OLDLastReleasedID = 0;
-
-    public uint RequestID()
-    {
-        var id = m_AvailableIDs.Dequeue();
-        m_InUseIDs.Add(id);
-        m_LastRequestID = id;
-        return id;
-    }
-
-    public void ReleaseID(uint id)
-    {
-        m_InUseIDs.Remove(id);
-        m_AvailableIDs.Enqueue(id);
-        m_LastReleasedID = id;
-    }
-
-    public uint GetLastRequestedID()
-    {
-        return m_LastRequestID;
-    }
 
     //TODO make sure that the member variables are synced
     public override void AssembleData(Writer writer, byte LOD = 100)
     {
-        writer.Write(m_AvailableIDs.ToArray(Allocator.Temp));
-        writer.Write(m_InUseIDs.ToNativeArray(Allocator.Temp));
-        writer.Write(m_LastRequestID);
+        var manager = m_IDManager;
+        writer.Write(manager.m_AvailableIDs.ToArray(Allocator.Temp));
+        writer.Write(manager.m_InUseIDs.ToNativeArray(Allocator.Temp));
+        writer.Write(manager.m_LastRequestID);
     }
 
     public override void DisassembleData(Reader reader, byte LOD = 100)
@@ -57,52 +30,45 @@ public class IDSyncer : Synchronizable, IComponentData
         var inUse = reader.Read<uint>();
         var last = reader.ReadUint();
 
+        var manager = m_IDManager;
 
-        m_AvailableIDs = new NativeQueue<uint>();
+        manager.m_AvailableIDs = new NativeQueue<uint>();
         foreach (var item in available)
         {
-            m_AvailableIDs.Enqueue(item);
+            manager.m_AvailableIDs.Enqueue(item);
         }
 
-        m_InUseIDs = new NativeHashSet<uint>();
+        manager.m_InUseIDs = new NativeHashSet<uint>();
         foreach (var item in inUse)
         {
-            m_InUseIDs.Add(item);
+            manager.m_InUseIDs.Add(item);
         }
 
-        m_LastRequestID = last;
+        manager.m_LastRequestID = last;
     }
 
     //Populates the queue with all available IDs
     void Start()
     {
-        m_AvailableIDs = new NativeQueue<uint>(Allocator.Temp);
-        m_InUseIDs = new NativeHashSet<uint>(1024, Allocator.Temp);
-
-        for (uint i = 0; i < 1024; ++i)
-        {
-            m_AvailableIDs.Enqueue(i);
-        }
-        m_OLDLastRequestID = m_LastRequestID;
-        m_OLDLastReleasedID = m_LastReleasedID;
-
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        _ = manager.CreateSingleton(this, "ID Syncer");
+        var query = manager.CreateEntityQuery(typeof(IDManager));
+        m_IDManager = query.GetSingleton<IDManager>();
     }
 
     void OnDestroy()
     {
-        m_AvailableIDs.Dispose();
-        m_InUseIDs.Dispose();
+        
     }
 
     void Update()
     {
-        if (m_OLDLastRequestID != m_LastRequestID ||
-            m_OLDLastReleasedID != m_LastReleasedID)
+        var manager = m_IDManager;
+        
+        if (manager.m_OLDLastRequestID != manager.m_LastRequestID ||
+           manager.m_OLDLastReleasedID != manager.m_LastReleasedID)
         {
-            m_OLDLastRequestID = m_LastRequestID;
-            m_OLDLastReleasedID = m_LastReleasedID;
+            manager.m_OLDLastRequestID = manager.m_LastRequestID;
+            manager.m_OLDLastReleasedID = manager.m_LastReleasedID;
 
             Commit();
         }
