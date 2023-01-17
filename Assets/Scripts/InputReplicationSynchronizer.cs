@@ -33,10 +33,7 @@ public class InputReplicationSynchronizer : Synchronizable
 
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         var query = manager.CreateEntityQuery(typeof(UserToEntityTranslator));
-
-        var arr = query.ToComponentArray<UserToEntityTranslator>();
-        if (arr.Length == 0) { return; }
-        var translator = arr[0];
+        var translator = query.GetSingleton<UserToEntityTranslator>();
 
         for (int i = 0; i < entites.Length; i++)
         {
