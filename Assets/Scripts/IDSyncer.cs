@@ -80,6 +80,7 @@ public class IDSyncer : Synchronizable, IComponentData
     void Start()
     {
         m_AvailableIDs = new NativeQueue<uint>(Allocator.Persistent);
+        m_InUseIDs = new NativeHashSet<uint>(1024,Allocator.Persistent);
 
         for (uint i = 0; i < 1024; ++i)
         {
@@ -95,6 +96,7 @@ public class IDSyncer : Synchronizable, IComponentData
     void OnDestroy()
     {
         m_AvailableIDs.Dispose();
+        m_InUseIDs.Dispose();
     }
 
     void Update()
