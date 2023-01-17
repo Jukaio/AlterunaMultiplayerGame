@@ -35,13 +35,9 @@ public class EntitySpawner : MonoBehaviour, IComponentData
    
         var query = manager.CreateEntityQuery(typeof(IDToEntityTranslator));
 
-        var arr = query.ToComponentArray<IDToEntityTranslator>();
-        if (arr.Length != 0) 
-        {
-            var translator = arr[0];
-            translator.IDEntityMap.Add(syncID, entity);
-        }
-       
+        var translator = query.GetSingleton<IDToEntityTranslator>();
+        translator.IDEntityMap.Add(syncID, entity);
+
         return entity;
     }
 
