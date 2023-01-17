@@ -30,7 +30,7 @@ public class EntitySpawner : MonoBehaviour, IComponentData
     {
 
         var entity = manager.CreateEntity(archetype);
-        manager.AddComponent(entity, typeof(SyncID));
+        manager.AddComponent<SyncID>(entity);
         manager.SetComponentData(entity, new SyncID { value = syncID });
    
         var query = manager.CreateEntityQuery(typeof(IDToEntityTranslator));
