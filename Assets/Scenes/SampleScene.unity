@@ -1077,6 +1077,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   quadMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   defaultMaterial: {fileID: 2100000, guid: 1a1b309db4f133040a10d12fcd3f7f2b, type: 2}
+  bulletMaterial: {fileID: 2100000, guid: c3d2cbb5b1c7a7642bf1c0708b420264, type: 2}
 --- !u!4 &2032387662
 Transform:
   m_ObjectHideFlags: 0

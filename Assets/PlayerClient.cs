@@ -4,7 +4,7 @@ using UnityEngine;
 using Unity.Entities;
 using Alteruna;
 using Unity.Collections;
-
+using Unity.Mathematics;
 
 public class PlayerClient : MonoBehaviour
 {
@@ -23,7 +23,14 @@ public class PlayerClient : MonoBehaviour
 
     private void OnDestroy()
     {
+        if(World.DefaultGameObjectInjectionWorld == null) {
+            return;
+        }
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        if(manager == null) {
+            return;
+        }
+
         manager.DestroyEntity(entity);
         entity = Entity.Null;
     }
@@ -85,5 +92,4 @@ public class PlayerClient : MonoBehaviour
         var translator = translatorQuery.GetSingleton<UserToEntityTranslator>();
         translator.ClientEntityMap.Add(user.Index, e);
     }
-
 }
