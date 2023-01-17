@@ -4,7 +4,7 @@ using UnityEngine;
 using Unity.Entities;
 using Alteruna;
 using Unity.Collections;
-
+using Unity.Mathematics;
 
 public class PlayerClient : MonoBehaviour
 {
@@ -23,7 +23,14 @@ public class PlayerClient : MonoBehaviour
 
     private void OnDestroy()
     {
+        if(World.DefaultGameObjectInjectionWorld == null) {
+            return;
+        }
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        if(manager == null) {
+            return;
+        }
+
         manager.DestroyEntity(entity);
         entity = Entity.Null;
     }
@@ -38,21 +45,11 @@ public class PlayerClient : MonoBehaviour
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        var clientArchetype = manager.CreateArchetype(
-            typeof(Position),
-            typeof(Player),
-            typeof(Velocity),
-            typeof(Rotation),
-            typeof(InputComp),
-            typeof(SizeComp),
-            typeof(ColliderComp));
-
+        var clientArchetype = manager.CreateArchetype(typeof(Position), typeof(Player), typeof(Velocity),typeof(Rotation),typeof(InputComp));
         var e = manager.CreateEntity(clientArchetype);
         manager.SetComponentData(e, new Player { index = user.Index });
-        manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
+        manager.SetComponentData(e, new Velocity { value = math.float3(0.0f, 0.0f, 0.0f) });
         manager.SetComponentData(e, new Rotation {value = 0.0f});
-        manager.SetComponentData(e, new SizeComp { size = 1f });
-
         if(avatar.IsMe) {
             manager.AddComponent<Local>(e);
         }
@@ -60,14 +57,5 @@ public class PlayerClient : MonoBehaviour
             manager.AddComponent<Remote>(e);
         }
         this.entity = e;
-
-        //Adds the new entity to the local translator hashmap with the key of user index 
-        var query = manager.CreateEntityQuery(typeof(UserToEntityTranslator));
-        var translators=query.ToComponentArray<UserToEntityTranslator>();
-        for (int i = 0; i < translators.Length; i++)
-        {
-            translators[i].ClientEntityMap.Add(user.Index, e);
-        }
     }
-
 }
