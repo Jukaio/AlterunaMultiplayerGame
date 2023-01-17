@@ -12,16 +12,17 @@ using Unity.Collections.LowLevel.Unsafe;
 //TODO when spawning stuff we should request an id that we then send with the RPC to all other remote clients when doing the spawn request
 public class IDSyncer : Synchronizable
 {
-    IDManager m_IDManager;
-
 
     //TODO make sure that the member variables are synced
     public override void AssembleData(Writer writer, byte LOD = 100)
     {
-        var manager = m_IDManager;
-        writer.Write(manager.m_AvailableIDs.ToArray(Allocator.Temp));
-        writer.Write(manager.m_InUseIDs.ToNativeArray(Allocator.Temp));
-        writer.Write(manager.m_LastRequestID);
+        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        var query = manager.CreateEntityQuery(typeof(IDManager));
+        var idManager = query.GetSingleton<IDManager>();
+
+        writer.Write(idManager.m_AvailableIDs.ToArray(Allocator.Temp));
+        writer.Write(idManager.m_InUseIDs.ToNativeArray(Allocator.Temp));
+        writer.Write(idManager.m_LastRequestID);
     }
 
     public override void DisassembleData(Reader reader, byte LOD = 100)
@@ -30,29 +31,29 @@ public class IDSyncer : Synchronizable
         var inUse = reader.Read<uint>();
         var last = reader.ReadUint();
 
-        var manager = m_IDManager;
+        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        var query = manager.CreateEntityQuery(typeof(IDManager));
+        var idManager = query.GetSingleton<IDManager>();
 
-        manager.m_AvailableIDs = new NativeQueue<uint>();
+        idManager.m_AvailableIDs = new NativeQueue<uint>();
         foreach (var item in available)
         {
-            manager.m_AvailableIDs.Enqueue(item);
+            idManager.m_AvailableIDs.Enqueue(item);
         }
 
-        manager.m_InUseIDs = new NativeHashSet<uint>();
+        idManager.m_InUseIDs = new NativeHashSet<uint>();
         foreach (var item in inUse)
         {
-            manager.m_InUseIDs.Add(item);
+            idManager.m_InUseIDs.Add(item);
         }
 
-        manager.m_LastRequestID = last;
+        idManager.m_LastRequestID = last;
     }
 
     //Populates the queue with all available IDs
     void Start()
     {
-        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        var query = manager.CreateEntityQuery(typeof(IDManager));
-        m_IDManager = query.GetSingleton<IDManager>();
+       
     }
 
     void OnDestroy()
@@ -62,13 +63,15 @@ public class IDSyncer : Synchronizable
 
     void Update()
     {
-        var manager = m_IDManager;
-        
-        if (manager.m_OLDLastRequestID != manager.m_LastRequestID ||
-           manager.m_OLDLastReleasedID != manager.m_LastReleasedID)
+        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        var query = manager.CreateEntityQuery(typeof(IDManager));
+        var idManager = query.GetSingleton<IDManager>();
+
+        if (idManager.m_OLDLastRequestID != idManager.m_LastRequestID ||
+           idManager.m_OLDLastReleasedID != idManager.m_LastReleasedID)
         {
-            manager.m_OLDLastRequestID = manager.m_LastRequestID;
-            manager.m_OLDLastReleasedID = manager.m_LastReleasedID;
+            idManager.m_OLDLastRequestID = idManager.m_LastRequestID;
+            idManager.m_OLDLastReleasedID = idManager.m_LastReleasedID;
 
             Commit();
         }
