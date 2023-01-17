@@ -48,23 +48,23 @@ public class PlayerClient : MonoBehaviour
             typeof(ColliderComp));
 
 
-        var spawnQuery = manager.CreateEntityQuery(typeof(EntitySpawner));
-        var spawner = spawnQuery.GetSingleton<EntitySpawner>();
+        //var spawnQuery = manager.CreateEntityQuery(typeof(EntitySpawner));
+        //var spawner = spawnQuery.GetSingleton<EntitySpawner>();
 
-        var syncQuery = manager.CreateEntityQuery(typeof(IDSyncer));
-        var syncer = syncQuery.GetSingleton<IDSyncer>();
-        uint syncID;
+        //var syncQuery = manager.CreateEntityQuery(typeof(IDSyncer));
+        //var syncer = syncQuery.GetSingleton<IDSyncer>();
+        //uint syncID;
 
-        if (avatar.IsMe)
-        {
-            syncID = syncer.RequestID();
-        }
-        else
-        {
-            syncID = syncer.GetLastRequestedID();
-        }
+        //if (avatar.IsMe)
+        //{
+        //    syncID = syncer.RequestID();
+        //}
+        //else
+        //{
+        //    syncID = syncer.GetLastRequestedID();
+        //}
 
-        var e = spawner.SpawnEntity(syncID, manager, clientArchetype); //manager.CreateEntity(clientArchetype);
+        var e = manager.CreateEntity(clientArchetype);//spawner.SpawnEntity(syncID, manager, clientArchetype); //manager.CreateEntity(clientArchetype);
         manager.SetComponentData(e, new Player { index = user.Index });
         manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
         manager.SetComponentData(e, new Rotation { value = 0.0f });
