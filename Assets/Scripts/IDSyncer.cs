@@ -13,7 +13,7 @@ public struct SyncID : IComponentData
 
 //TODO this class is intended to keep track of used IDs and sync them across game instances
 //TODO when spawning stuff we should request an id that we then send with the RPC to all other remote clients when doing the spawn request
-public class IDSyncer : Synchronizable
+public class IDSyncer : Synchronizable, IComponentData
 {
 
     NativeQueue<uint> m_AvailableIDs;
@@ -59,6 +59,8 @@ public class IDSyncer : Synchronizable
         {
             m_AvailableIDs.Enqueue(i);
         }
+        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        _ = manager.CreateSingleton(this, "ID Syncer");
     }
 
     void OnDestroy()
