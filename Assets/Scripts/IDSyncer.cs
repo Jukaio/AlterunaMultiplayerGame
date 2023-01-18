@@ -27,8 +27,8 @@ public class IDSyncer : Synchronizable
 
     public override void DisassembleData(Reader reader, byte LOD = 100)
     {
-        var available = reader.Read<uint>();
-        var inUse = reader.Read<uint>();
+        var available = reader.ReadArray<uint>();
+        var inUse = reader.ReadArray<uint>();
         var last = reader.ReadUint();
 
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;

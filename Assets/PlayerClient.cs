@@ -43,6 +43,9 @@ public class PlayerClient : MonoBehaviour
 
     private void CreateUser(User user)
     {
+        if(!avatar.IsMe) {
+            return;
+        }
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         var clientArchetype = manager.CreateArchetype(

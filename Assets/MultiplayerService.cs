@@ -13,12 +13,15 @@ public struct Player : IComponentData
 
 public struct LocalInfo : IComponentData
 {
-    public ushort index;
+    public ushort userIndex;
+    public FixedString64Bytes userName;
 }
 
 public class MultiplayerService : MonoBehaviour, IComponentData
 {
     private Multiplayer multiplayer = null;
+    public Multiplayer mp => multiplayer;
+
 
     private void Awake()
     {
@@ -59,7 +62,8 @@ public class MultiplayerService : MonoBehaviour, IComponentData
     {
         Debug.Log($"Conntected... {ep.Name}");
         LocalInfo localInfo = new();
-        localInfo.index = mp.Me.Index;
+        localInfo.userIndex = mp.Me.Index;
+        localInfo.userName = new(mp.Me.Name);
 
         World.DefaultGameObjectInjectionWorld.EntityManager.CreateSingleton(localInfo, "Local Info");
     }
@@ -76,8 +80,10 @@ public class MultiplayerService : MonoBehaviour, IComponentData
 
     private void OnOtherUserJoin(Multiplayer mp, User user)
     {
+
+
         Debug.Log(user);
-        
+
     }
 
     private void OnOtherUserLeave(Multiplayer mp, User user)
@@ -87,6 +93,14 @@ public class MultiplayerService : MonoBehaviour, IComponentData
 
     private void OnRoomJoin(Multiplayer mp, Room room, User user)
     {
+        LocalInfo localInfo = new();
+        localInfo.userIndex = mp.Me.Index;
+        localInfo.userName = new(mp.Me.Name);
+
+        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        var query = manager.CreateEntityQuery(typeof(LocalInfo));
+        query.SetSingleton(localInfo);
+
         Debug.Log(user);
     }
 

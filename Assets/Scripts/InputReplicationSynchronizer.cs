@@ -27,9 +27,9 @@ public class InputReplicationSynchronizer : Synchronizable
     public override void DisassembleData(Reader reader, byte LOD = 100)
     {
 
-        var entites = reader.Read<Entity>();
-        var clients = reader.Read<Player>();
-        var inputComps = reader.Read<InputComp>();
+        var entites = reader.ReadArray<Entity>();
+        var clients = reader.ReadArray<Player>();
+        var inputComps = reader.ReadArray<InputComp>();
 
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         var query = manager.CreateEntityQuery(typeof(UserToEntityTranslator));
