@@ -35,13 +35,13 @@ public class IDSyncer : Synchronizable
         var query = manager.CreateEntityQuery(typeof(IDManager));
         var idManager = query.GetSingleton<IDManager>();
 
-        idManager.m_AvailableIDs = new NativeQueue<uint>(Allocator.Temp);
+        idManager.m_AvailableIDs = new NativeQueue<uint>(Allocator.Persistent);
         foreach (var item in available)
         {
             idManager.m_AvailableIDs.Enqueue(item);
         }
 
-        idManager.m_InUseIDs = new NativeHashSet<uint>(1024,Allocator.Temp);
+        idManager.m_InUseIDs = new NativeHashSet<uint>(1024,Allocator.Persistent);
         foreach (var item in inUse)
         {
             idManager.m_InUseIDs.Add(item);
