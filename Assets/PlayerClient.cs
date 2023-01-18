@@ -30,7 +30,6 @@ public class PlayerClient : MonoBehaviour
         if(manager == null) {
             return;
         }
-
         manager.DestroyEntity(entity);
         entity = Entity.Null;
     }
