@@ -64,7 +64,12 @@ public class PlayerSynchroniser : Synchronizable
     public override void AssembleData(Writer writer, byte LOD = 100)
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        var playerQuery = manager.CreateEntityQuery(typeof(Player), typeof(Position), typeof(Local));
+        var playerQuery = manager.CreateEntityQuery(
+            typeof(Player),
+            typeof(Position),
+            typeof(Rotation),
+            typeof(InputComp),
+            typeof(Local));
 
         var localInfoQuery = manager.CreateEntityQuery(typeof(LocalInfo));
         var localInfo = localInfoQuery.GetSingleton<LocalInfo>();
@@ -72,6 +77,7 @@ public class PlayerSynchroniser : Synchronizable
 
         writer.Write(playerQuery.ToComponentDataArray<Position>(Allocator.Temp));
         writer.Write(playerQuery.ToComponentDataArray<Rotation>(Allocator.Temp));
+        writer.Write(playerQuery.ToComponentDataArray<InputComp>(Allocator.Temp));
     }
 
     public override void DisassembleData(Reader reader, byte LOD = 100)
@@ -81,12 +87,13 @@ public class PlayerSynchroniser : Synchronizable
         var userIndex = reader.ReadUshort();
         var positions = reader.ReadArray<Position>();
         var rotations = reader.ReadArray<Rotation>();
+        var inputComps = reader.ReadArray<InputComp>();
 
 
         var totalCount = positions.Length;
         var differenceForCreation = totalCount - userPlayers[userIndex].Length;
         for(var i = 0; i < differenceForCreation; i++) {
-            var entity = manager.CreateEntity(typeof(Position), typeof(Rotation), typeof(Remote));
+            var entity = manager.CreateEntity(typeof(Position), typeof(Rotation), typeof(Remote), typeof(InputComp));
             var list = userPlayers[userIndex];
             list.Add(entity);
             userPlayers[userIndex] = list;
@@ -111,6 +118,7 @@ public class PlayerSynchroniser : Synchronizable
             manager.RemoveComponent(entity, typeof(Bullet));
             manager.SetComponentData(entity, positions[i]);
             manager.SetComponentData(entity, rotations[i]);
+            manager.SetComponentData(entity, inputComps[i]);
         }
     }
 
