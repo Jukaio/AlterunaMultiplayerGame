@@ -104,9 +104,26 @@ public class MultiplayerService : MonoBehaviour, IComponentData
         Debug.Log(user);
     }
 
+    // If player leaves room, just clear everything local and remote
     private void OnRoomLeave(Multiplayer mp)
     {
-        Debug.Log(mp);
+        if (World.DefaultGameObjectInjectionWorld == null) {
+            return;
+        }
+        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        if (manager == null) {
+            return;
+        }
+
+        var query = manager.CreateEntityQuery(typeof(Local));
+        foreach (var entity in query.ToEntityArray(Allocator.Temp)) {
+            manager.DestroyEntity(entity);
+        }
+
+        query = manager.CreateEntityQuery(typeof(Remote));
+        foreach (var entity in query.ToEntityArray(Allocator.Temp)) {
+            manager.DestroyEntity(entity);
+        }
     }
 
     private void OnRoomUserListUpdate(Multiplayer mp)

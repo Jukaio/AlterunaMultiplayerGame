@@ -13,6 +13,7 @@ public struct Remote : IComponentData
 
 }
 
+// TODO: Register to multiplayer events to clean up data of users 
 public abstract class Replicator : Synchronizable
 {
     private NativeArray<UnsafeList<Entity>> pools;
@@ -51,7 +52,11 @@ public abstract class Replicator : Synchronizable
 
     private void OnDestroy()
     {
+        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         foreach (var collection in pools) {
+            foreach(var entity in collection) {
+                manager.DestroyEntity(entity);
+            }
             if (collection.IsCreated) {
                 collection.Dispose();
             }

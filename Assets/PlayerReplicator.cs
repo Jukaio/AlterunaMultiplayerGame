@@ -1,13 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+
 using Alteruna;
 using Unity.Entities;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
 
-public class PlayerSynchroniser : Replicator
+public class PlayerReplicator : Replicator
 {
     public override void OnAssembleData(in EntityQuery query, Writer writer, byte LOD = 100)
     {
@@ -31,8 +29,6 @@ public class PlayerSynchroniser : Replicator
 
         for (int i = 0; i < entities.Length; i++) {
             var entity = entities[i];
-            manager.AddComponent(entity, typeof(Player));
-            manager.RemoveComponent(entity, typeof(Bullet));
             manager.SetComponentData(entity, positions[i]);
             manager.SetComponentData(entity, rotations[i]);
         }
