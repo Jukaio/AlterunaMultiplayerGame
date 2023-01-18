@@ -56,25 +56,9 @@ public class PlayerClient : MonoBehaviour
             typeof(InputComp),
             typeof(SizeComp),
             typeof(ColliderComp));
+   
 
-
-        var spawnQuery = manager.CreateEntityQuery(typeof(EntitySpawner));
-        var spawner = spawnQuery.GetSingleton<EntitySpawner>();
-
-        var idQuery = manager.CreateEntityQuery(typeof(IDManager));
-        var idManager = idQuery.GetSingleton<IDManager>();
-        uint syncID;
-
-        if (avatar.IsMe)
-        {
-            syncID = idManager.RequestID();
-        }
-        else
-        {
-            syncID = idManager.GetLastRequestedID();
-        }
-
-        var e = spawner.SpawnEntity(syncID, manager, clientArchetype); //manager.CreateEntity(clientArchetype);
+        var e = manager.CreateEntity(clientArchetype);
         manager.SetComponentData(e, new Player { index = user.Index });
         manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
         manager.SetComponentData(e, new Rotation { value = 0.0f });
