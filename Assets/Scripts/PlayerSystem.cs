@@ -20,11 +20,11 @@ public struct Rotation : IComponentData
 }
 
 [UpdateBefore(typeof(MovementSystem))]
-public partial struct InputToVelocitySystem : ISystem
+public partial struct MomentumToVelocitySystem : ISystem
 {
     EntityQuery query;
     ComponentLookup<Velocity> velocities;
-    ComponentLookup<InputComp> inputComps;
+    ComponentLookup<Momentum> momentums;
     ComponentLookup<Rotation> rotations;
     public void OnCreate(ref SystemState state)
     {
@@ -34,7 +34,7 @@ public partial struct InputToVelocitySystem : ISystem
             .WithAll<Player, Local>()
             .Build(ref state);
         velocities = state.GetComponentLookup<Velocity>(false);
-        inputComps = state.GetComponentLookup<InputComp>(false);
+        momentums = state.GetComponentLookup<Momentum>(false);
         rotations = state.GetComponentLookup<Rotation>(false);
     }
 
@@ -49,21 +49,21 @@ public partial struct InputToVelocitySystem : ISystem
 
         var entities = query.ToEntityArray(Allocator.Temp);
         velocities.Update(ref state);
-        inputComps.Update(ref state);
+        momentums.Update(ref state);
         rotations.Update(ref state);
         
         const float SPEED = 3f;
 
         foreach (var entity in entities) 
         {
-            var input = inputComps[entity];
+            var momentum = momentums[entity].value;
             //var vel = (input.Forward ? speed : input.Back ? -speed : 0f);        
             //var quat = Quaternion.Euler(0, 0, rotations[entity].value);
-            var speed = (input.Forward ? SPEED : input.Back ? -SPEED : 0f);
+            //var speed = (input.Forward ? SPEED : input.Back ? -SPEED : 0f);
             var angle = rotations[entity].radians;
             var direction = math.float3(math.cos(angle), math.sin(angle), 0.0f);
 
-            velocities[entity] = new Velocity { value =  direction * speed };
+            velocities[entity] = new Velocity { value =  direction * momentum * SPEED};
         }
     }
 }
@@ -93,7 +93,7 @@ public partial struct InputToRotationSystem : ISystem
         rotation.Update(ref state);
         inputComps.Update(ref state);
 
-        float speed = 1f;
+        float speed = 3f;
         foreach (var entity in entities) 
         {
             var input = inputComps[entity];

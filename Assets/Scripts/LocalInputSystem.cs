@@ -15,7 +15,7 @@ public struct InputComp : IComponentData
     public bool Shoot;
 }
 
-[UpdateBefore(typeof(InputToVelocitySystem))]
+[UpdateBefore(typeof(MomentumToVelocitySystem))]
 public partial class LocalInputSystem : SystemBase
 {
     private InputActions m_InputActions;
