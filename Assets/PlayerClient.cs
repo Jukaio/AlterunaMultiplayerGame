@@ -72,10 +72,5 @@ public class PlayerClient : MonoBehaviour
             manager.AddComponent<Remote>(e);
         }
         this.entity = e;
-
-        //Adds the new entity to the local translator hashmap with the key of user index 
-        var translatorQuery = manager.CreateEntityQuery(typeof(UserToEntityTranslator));
-        var translator = translatorQuery.GetSingleton<UserToEntityTranslator>();
-        translator.ClientEntityMap.Add(user.Index, e);
     }
 }

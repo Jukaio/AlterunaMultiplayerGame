@@ -11,14 +11,18 @@ public class PlayerReplicator : Replicator
     {
         writer.Write(query.ToComponentDataArray<Position>(Allocator.Temp));
         writer.Write(query.ToComponentDataArray<Rotation>(Allocator.Temp));
+        writer.Write(query.ToComponentDataArray<ColliderComp>(Allocator.Temp));
+        writer.Write(query.ToComponentDataArray<InputComp>(Allocator.Temp));
     }
 
     public override void OnCreate(out ComponentType[] types)
     {
-        types = new ComponentType[3];
+        types = new ComponentType[5];
         types[0] = typeof(Player);
         types[1] = typeof(Position);
         types[2] = typeof(Rotation);
+        types[3] = typeof(ColliderComp);
+        types[4] = typeof(InputComp);
     }
 
     public override void OnDisassembleData(in UnsafeList<Entity> entities, Reader reader, byte LOD = 100)
@@ -26,11 +30,15 @@ public class PlayerReplicator : Replicator
         var manager = World.EntityManager;
         var positions = reader.ReadArray<Position>();
         var rotations = reader.ReadArray<Rotation>();
+        var colliders = reader.ReadArray<ColliderComp>();
+        var inputComps = reader.ReadArray<InputComp>();
 
         for (int i = 0; i < entities.Length; i++) {
             var entity = entities[i];
             manager.SetComponentData(entity, positions[i]);
             manager.SetComponentData(entity, rotations[i]);
+            manager.SetComponentData(entity, colliders[i]);
+            manager.SetComponentData(entity, inputComps[i]);
         }
     }
 }
