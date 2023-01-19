@@ -54,7 +54,8 @@ public class PlayerClient : MonoBehaviour
             typeof(Rotation),
             typeof(InputComp),
             typeof(SizeComp),
-            typeof(ColliderComp));
+            typeof(ColliderComp),
+            typeof(Momentum));
    
 
         var e = manager.CreateEntity(clientArchetype);
