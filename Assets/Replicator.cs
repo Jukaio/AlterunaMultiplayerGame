@@ -2,6 +2,9 @@
 using Unity.Entities;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using System;
+using UnityEngine;
+using Alteruna.Trinity;
 
 public struct Local : IComponentData
 {
@@ -30,7 +33,7 @@ public abstract class Replicator : Synchronizable
     private void Start()
     {
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-
+        
         pools = new(64, Allocator.Persistent);
         OnCreate(out types);
 
@@ -62,6 +65,8 @@ public abstract class Replicator : Synchronizable
             }
         }
         pools.Dispose();
+
+        base.OnDestroy();
     }
 
     public abstract void OnCreate(out ComponentType[] types);
@@ -122,3 +127,4 @@ public abstract class Replicator : Synchronizable
         SyncUpdate();
     }
 }
+

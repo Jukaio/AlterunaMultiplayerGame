@@ -40,9 +40,15 @@ public partial struct ShootingSystem : ISystem
         positions.Update(ref state);
         rotations.Update(ref state);
 
+        var someQuery = manager.CreateEntityQuery(typeof(ExplosionMessenger));
+        var messenger = someQuery.GetSingleton<ExplosionMessenger>();
+
         foreach(var player in players) {
             // TODO: Implement input component 
             if (Keyboard.current[Key.Space].wasPressedThisFrame) {
+
+                messenger.Notify(new ExplosionMessage());
+
                 var angle = rotations[player].radians;
                 var direction = math.float3(math.cos(angle), math.sin(angle), 0.0f);
 

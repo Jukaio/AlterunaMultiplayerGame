@@ -26,7 +26,6 @@ public class InputReplicationSynchronizer : Synchronizable
 
     public override void DisassembleData(Reader reader, byte LOD = 100)
     {
-
         var entites = reader.ReadArray<Entity>();
         var clients = reader.ReadArray<Player>();
         var inputComps = reader.ReadArray<InputComp>();
