@@ -6,6 +6,11 @@ using Alteruna;
 using Unity.Collections;
 using Unity.Mathematics;
 
+public struct Team : IComponentData
+{
+    public bool value;
+}
+
 public class PlayerClient : MonoBehaviour
 {
     private Alteruna.Avatar avatar = null;
@@ -55,7 +60,8 @@ public class PlayerClient : MonoBehaviour
             typeof(InputComp),
             typeof(SizeComp),
             typeof(ColliderComp),
-            typeof(Momentum));
+            typeof(Momentum),
+            typeof(Team));
    
 
         var e = manager.CreateEntity(clientArchetype);
@@ -63,6 +69,7 @@ public class PlayerClient : MonoBehaviour
         manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
         manager.SetComponentData(e, new Rotation { value = 0.0f });
         manager.SetComponentData(e, new SizeComp { size = 1f });
+        manager.SetComponentData(e, new Team { value = (user.Index % 2) == 1 });
 
         if (avatar.IsMe)
         {
