@@ -1070,6 +1070,8 @@ MonoBehaviour:
   bulletMaterial: {fileID: 2100000, guid: c3d2cbb5b1c7a7642bf1c0708b420264, type: 2}
   team1Material: {fileID: 2100000, guid: 8a1ab2f9eee4d2d45a7b5f2982ff6718, type: 2}
   team2Material: {fileID: 2100000, guid: 9363a24fc7958b14c8554d49adcf56ab, type: 2}
+  team1BulletMaterial: {fileID: 2100000, guid: c4807cc3da8c1e74e81d3a3bfaf56d36, type: 2}
+  team2BulletMaterial: {fileID: 2100000, guid: 604f36509cd66df4499e4ee788df511f, type: 2}
 --- !u!4 &2032387662
 Transform:
   m_ObjectHideFlags: 0
