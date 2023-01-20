@@ -1068,6 +1068,8 @@ MonoBehaviour:
   quadMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   defaultMaterial: {fileID: 2100000, guid: 1a1b309db4f133040a10d12fcd3f7f2b, type: 2}
   bulletMaterial: {fileID: 2100000, guid: c3d2cbb5b1c7a7642bf1c0708b420264, type: 2}
+  team1Material: {fileID: 2100000, guid: 8a1ab2f9eee4d2d45a7b5f2982ff6718, type: 2}
+  team2Material: {fileID: 2100000, guid: 9363a24fc7958b14c8554d49adcf56ab, type: 2}
 --- !u!4 &2032387662
 Transform:
   m_ObjectHideFlags: 0
