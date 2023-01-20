@@ -14,17 +14,19 @@ public class PlayerReplicator : Replicator
         writer.Write(query.ToComponentDataArray<ColliderComp>(Allocator.Temp));
         writer.Write(query.ToComponentDataArray<InputComp>(Allocator.Temp));
         writer.Write(query.ToComponentDataArray<Momentum>(Allocator.Temp));
+        writer.Write(query.ToComponentDataArray<Team>(Allocator.Temp));
     }
 
     public override void OnCreate(out ComponentType[] types)
     {
-        types = new ComponentType[6];
+        types = new ComponentType[7];
         types[0] = typeof(Player);
         types[1] = typeof(Position);
         types[2] = typeof(Rotation);
         types[3] = typeof(ColliderComp);
         types[4] = typeof(InputComp);
         types[5] = typeof(Momentum);
+        types[6] = typeof(Team);
     }
 
     public override void OnDisassembleData(in UnsafeList<Entity> entities, Reader reader, byte LOD = 100)
@@ -35,6 +37,7 @@ public class PlayerReplicator : Replicator
         var colliders = reader.ReadArray<ColliderComp>();
         var inputComps = reader.ReadArray<InputComp>();
         var momentums = reader.ReadArray<Momentum>();
+        var teams = reader.ReadArray<Team>();
 
         for (int i = 0; i < entities.Length; i++) {
             var entity = entities[i];
@@ -43,6 +46,7 @@ public class PlayerReplicator : Replicator
             manager.SetComponentData(entity, colliders[i]);
             manager.SetComponentData(entity, inputComps[i]);
             manager.SetComponentData(entity, momentums[i]);
+            manager.SetComponentData(entity, teams[i]);
         }
     }
 }
