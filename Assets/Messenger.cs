@@ -104,7 +104,7 @@ public abstract class Messenger<MessageDataType> : Synchronizable where MessageD
         base.OnDestroy();
     }
 
-    public void Notify(MessageDataType data)
+    public void Notify(MessageDataType data, bool notifyLocally=true)
     {
         Message message = new();
         message.id = uniqueIDCounter;
@@ -112,6 +112,9 @@ public abstract class Messenger<MessageDataType> : Synchronizable where MessageD
         message.clearAt = Time.realtimeSinceStartup + MESSAGE_TIMEOUT;
         uniqueIDCounter++;
         queue.Enqueue(message);
+
+        if(notifyLocally)
+        OnReceive(LocalInfo.userIndex ,data);
     }
 
     public override void AssembleData(Writer writer, byte LOD = 100)

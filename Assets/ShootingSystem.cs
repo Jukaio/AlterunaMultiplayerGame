@@ -43,14 +43,14 @@ public partial struct ShootingSystem : ISystem
         rotations.Update(ref state);
         teams.Update(ref state);
 
-        var someQuery = manager.CreateEntityQuery(typeof(ExplosionMessenger));
-        var messenger = someQuery.GetSingleton<ExplosionMessenger>();
+      
+      
 
         foreach(var player in players) {
             // TODO: Implement input component 
             if (Keyboard.current[Key.Space].wasPressedThisFrame) {
 
-                messenger.Notify(new ExplosionMessage());
+              
 
                 var angle = rotations[player].radians;
                 var direction = math.float3(math.cos(angle), math.sin(angle), 0.0f);
@@ -92,6 +92,10 @@ public partial struct BulletCleanupSystem : ISystem
         bullets.Update(ref state);
         var bulletEntities = bulletQuery.ToEntityArray(Allocator.Temp);
 
+        var manager = state.EntityManager;
+        var explosionQuery = manager.CreateEntityQuery(typeof(ExplosionMessenger));
+        var messenger = explosionQuery.GetSingleton<ExplosionMessenger>();
+
         var destroyList = new NativeList<Entity>(Allocator.Temp);
         foreach(var bullet in bulletEntities) {
             var bulletPosition = positions[bullet];
@@ -100,7 +104,9 @@ public partial struct BulletCleanupSystem : ISystem
                 destroyList.Add(bullet);
             }
         }
-        foreach(var bullet in destroyList) {
+        foreach(var bullet in destroyList) 
+        {
+            messenger.Notify(new ExplosionMessage(positions[bullet].value));
             state.EntityManager.DestroyEntity(bullet);
         }
     }
