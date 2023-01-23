@@ -41,6 +41,7 @@ public partial struct ShootingSystem : ISystem
 
         positions.Update(ref state);
         rotations.Update(ref state);
+        teams.Update(ref state);
 
         var someQuery = manager.CreateEntityQuery(typeof(ExplosionMessenger));
         var messenger = someQuery.GetSingleton<ExplosionMessenger>();
