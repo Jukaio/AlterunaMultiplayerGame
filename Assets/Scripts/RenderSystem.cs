@@ -112,3 +112,39 @@ public partial struct RenderSmallSystem : ISystem
 
     }
 }
+
+public partial struct RenderAsteroidSystem : ISystem
+{
+    EntityQuery spriteLibQuery;
+
+    public void OnCreate(ref SystemState state)
+    {
+        spriteLibQuery = state.GetEntityQuery(typeof(SpriteLibrary));
+    }
+
+    public void OnDestroy(ref SystemState state)
+    {
+
+    }
+
+    public void OnUpdate(ref SystemState state)
+    {
+        // SystemAPI is single threaded
+        NativeList<Matrix4x4> team1Matrices = new(Allocator.Temp);
+        foreach (var position in SystemAPI.Query<Position>().WithAll<AsteroidTag>())
+        {
+            var matrix = Matrix4x4.TRS(position.value, Quaternion.identity, Vector3.one * 0.3f);
+            team1Matrices.Add(matrix);
+        }
+
+        var spriteLib = spriteLibQuery.GetSingleton<SpriteLibrary>();
+        if (!team1Matrices.IsEmpty)
+        {
+            RenderParams team1RenderParams = new(spriteLib.Team1BulletMaterial); // Material in here
+            int count = Mathf.Min(1023, team1Matrices.Length);
+            Assert.IsTrue(team1Matrices.Length < 1024, "Too many matrices");
+            Graphics.RenderMeshInstanced(team1RenderParams, spriteLib.Mesh, 0, team1Matrices.AsArray(), count);
+        }
+
+    }
+}
