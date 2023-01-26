@@ -162,9 +162,21 @@ public partial struct CollisionSystem : ISystem
 
 public partial struct CollisionOrderSystem : ISystem
 {
+    private EntityQuery playerQuery;
+    private EntityQuery bulletQuery;
+    private ComponentLookup<Team> m_TeamLookup;
+
     public void OnCreate(ref SystemState state)
     {
+        playerQuery = new EntityQueryBuilder(Allocator.Temp)
+         .WithAllRW<Player,Team>()
+         .Build(ref state);
 
+        bulletQuery = new EntityQueryBuilder(Allocator.Temp)
+         .WithAllRW<Bullet, Team>()
+         .Build(ref state);
+
+        m_TeamLookup = state.GetComponentLookup<Team>();
     }
 
     public void OnDestroy(ref SystemState state)
@@ -183,12 +195,47 @@ public partial struct CollisionOrderSystem : ISystem
         var orderQueue = collisionOrderQueue.Queue;
         var handeledOrders = collisionOrderQueue.HandledList;
 
+        //TODO get access to the score counters which should be messengers,
+        // increase score via message if a bullet hit a player of another team.
+
+        var scoreQuery = manager.CreateEntityQuery(typeof(ScoreCounterMessenger));
+        var messenger = scoreQuery.GetSingleton<ScoreCounterMessenger>();
+
+        var playerEntites = playerQuery.ToEntityArray(Allocator.Temp);
+        var bulletEntites = bulletQuery.ToEntityArray(Allocator.Temp);
+        m_TeamLookup.Update(ref state);
 
         while (!orderQueue.IsEmpty())
         {
             var order = orderQueue.Dequeue();
             handeledOrders.Add(order);
-            Debug.LogError("Entity: " + order.A.ToString() + " collided with Entity: " + order.B.ToString());
+
+            bool playerHit = false;
+            bool whichTeam = false;
+            if (playerEntites.Contains(order.A))
+            {
+                playerHit = true;
+                whichTeam = m_TeamLookup[order.B].value;
+            }
+            else if (playerEntites.Contains(order.B))
+            {
+                playerHit = true;
+                whichTeam = m_TeamLookup[order.A].value;
+            }
+          
+
+            bool oneWasBullet = false;
+            if (bulletEntites.Contains(order.A)|| bulletEntites.Contains(order.B))
+            {
+                oneWasBullet = true;
+            }
+
+            if(oneWasBullet && playerHit)
+            {
+                messenger.Notify(new ScoreMessage(whichTeam),false);
+            }
+
+            //Debug.LogError("Entity: " + order.A.ToString() + " collided with Entity: " + order.B.ToString());
         }
     }
 }
