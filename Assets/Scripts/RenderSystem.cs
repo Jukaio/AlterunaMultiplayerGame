@@ -148,3 +148,47 @@ public partial struct RenderAsteroidSystem : ISystem
 
     }
 }
+
+public partial struct RenderColliderSystem : ISystem
+{
+    EntityQuery spriteLibQuery;
+
+    public void OnCreate(ref SystemState state)
+    {
+        spriteLibQuery = state.GetEntityQuery(typeof(SpriteLibrary));
+    }
+
+    public void OnDestroy(ref SystemState state)
+    {
+
+    }
+
+    public void OnUpdate(ref SystemState state)
+    {
+        // SystemAPI is single threaded
+        NativeList<Matrix4x4> matrices = new(Allocator.Temp);
+   
+        foreach (var collider in SystemAPI.Query<ColliderComp>())
+        {
+            var matrix = Matrix4x4.TRS(new Vector3( collider.Min.x, collider.Min.y,0f), Quaternion.identity, new Vector3(0.1f, 0.1f, 0.1f));         
+            matrices.Add(matrix);
+            matrix = Matrix4x4.TRS(new Vector3(collider.Max.x, collider.Max.y, 0f), Quaternion.identity, new Vector3(0.1f, 0.1f, 0.1f));
+            matrices.Add(matrix);
+            matrix = Matrix4x4.TRS(new Vector3(collider.Max.x, collider.Min.y, 0f), Quaternion.identity, new Vector3(0.1f, 0.1f, 0.1f));
+            matrices.Add(matrix);
+            matrix = Matrix4x4.TRS(new Vector3(collider.Min.x, collider.Max.y, 0f), Quaternion.identity, new Vector3(0.1f, 0.1f, 0.1f));
+            matrices.Add(matrix);
+        }
+
+        var spriteLib = spriteLibQuery.GetSingleton<SpriteLibrary>();
+        if (!matrices.IsEmpty)
+        {
+            RenderParams RenderParams = new(spriteLib.DefaultMaterial); // Material in here
+            int count = Mathf.Min(1023, matrices.Length);
+            Assert.IsTrue(matrices.Length < 1024, "Too many matrices");
+            Graphics.RenderMeshInstanced(RenderParams, spriteLib.Mesh, 0, matrices.AsArray(), count);
+        }
+
+      
+    }
+}

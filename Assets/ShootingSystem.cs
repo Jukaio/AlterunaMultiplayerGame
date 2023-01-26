@@ -26,7 +26,7 @@ public partial struct ShootingSystem : ISystem
         rotations = state.GetComponentLookup<Rotation>();
         teams = state.GetComponentLookup<Team>();
         playerQuery = state.GetEntityQuery(typeof(Player), typeof(Position), typeof(Rotation), typeof(Local),typeof(Team));
-        bulletArchetype = state.EntityManager.CreateArchetype(typeof(Bullet), typeof(Position), typeof(Local), typeof(Velocity), typeof(Team));
+        bulletArchetype = state.EntityManager.CreateArchetype(typeof(Bullet), typeof(Position), typeof(Local), typeof(Velocity), typeof(Team),typeof(SizeComp),typeof(ColliderComp));
     }
 
     public void OnDestroy(ref SystemState state)
@@ -61,6 +61,7 @@ public partial struct ShootingSystem : ISystem
                 manager.SetComponentData(bullet, new Velocity { value = direction * 10.0f });
                 manager.SetComponentData(bullet, new Bullet { owner = player });
                 manager.SetComponentData(bullet, new Team { value = teams[player].value });
+                manager.SetComponentData(bullet, new SizeComp { size = new float2(0.3f, 0.3f) });
             }
         }
     }

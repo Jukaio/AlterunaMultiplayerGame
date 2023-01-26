@@ -66,15 +66,16 @@ public partial struct CollisionSystem : ISystem
 
     private EntityQuery query;
     private ComponentLookup<ColliderComp> m_ColliderCompLookup;
+    private ComponentLookup<Team> m_TeamLookup;
 
-    //TODO check if we should only collide with locals or if remotes are fine too
     public void OnCreate(ref SystemState state)
     {
         query = new EntityQueryBuilder(Allocator.Temp)
-         .WithAllRW<ColliderComp>()
+         .WithAllRW<ColliderComp,Team>()
          .Build(ref state);
 
         m_ColliderCompLookup = state.GetComponentLookup<ColliderComp>();
+        m_TeamLookup = state.GetComponentLookup<Team>();
     }
 
     public void OnDestroy(ref SystemState state)
@@ -86,13 +87,14 @@ public partial struct CollisionSystem : ISystem
     {
         var entities = query.ToEntityArray(Allocator.Temp);
         m_ColliderCompLookup.Update(ref state);
+        m_TeamLookup.Update(ref state);
 
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         var orderQuery = manager.CreateEntityQuery(typeof(CollisisonOrderQueue));
 
-        var arr = orderQuery.ToComponentArray<CollisisonOrderQueue>();
-        if (arr.Length == 0) { return; }
-        var orderQueue = arr[0].Queue;
+        var collisionOrderQueue = orderQuery.GetSingleton<CollisisonOrderQueue>();
+        var orderQueue = collisionOrderQueue.Queue;
+        var handeledOrders = collisionOrderQueue.HandledList;
 
         //TODO might want to implement a quadtree for the sake of effiency when checking collisions, instead of checking against all in world
         foreach (var entityA in entities)
@@ -100,6 +102,7 @@ public partial struct CollisionSystem : ISystem
             foreach (var entityB in entities)
             {
                 if (entityA == entityB) { continue; }
+                if (m_TeamLookup[entityA].value == m_TeamLookup[entityB].value) { continue; }
 
                 var aMin = m_ColliderCompLookup[entityA].Min;
                 var aMax = m_ColliderCompLookup[entityA].Max;
@@ -107,22 +110,48 @@ public partial struct CollisionSystem : ISystem
                 var bMin = m_ColliderCompLookup[entityB].Min;
                 var bMax = m_ColliderCompLookup[entityB].Max;
 
+                var newOrder = new CollisionOrder(entityA, entityB);
+
                 if (aMax.x >= bMin.x && aMin.x <= bMax.x && aMax.y >= bMin.y && aMin.y <= bMax.y)
                 {
-                    var newOrder = new CollisionOrder(entityA, entityB);
-                    //TODO Make sure that duplicate collision orders don't get added
+                    if(CollisionAlreadyHandeled(handeledOrders, newOrder)) { continue; }
+
                     if (orderQueue.Count > 0)
                     {
                         var orderArray = orderQueue.ToArray(Allocator.Temp);
-                        foreach (var currentOrder in orderArray)
-                        {
-                            if(SameCollision(currentOrder, newOrder)) { continue; }
-                        }
+                        if (DoesQueueAlreadyHaveCollision(newOrder, orderArray)) { continue; }
                     }
+
                     orderQueue.Enqueue(newOrder);
+                }
+                else
+                {
+                    for (int i = handeledOrders.Length - 1; i >= 0; i--)
+                    {
+                        var order = handeledOrders[i];
+                        if (SameCollision(order, newOrder)) { handeledOrders.RemoveAt(i); }
+                    }
                 }
             }
         }
+    }
+
+    private static bool CollisionAlreadyHandeled(NativeList<CollisionOrder> handeledOrders, CollisionOrder newOrder)
+    {
+        foreach (var order in handeledOrders)
+        {
+            if (SameCollision(order, newOrder)) { return true; }
+        }
+        return false;
+    }
+
+    private static bool DoesQueueAlreadyHaveCollision(CollisionOrder newOrder, NativeArray<CollisionOrder> orderArray)
+    {
+        foreach (var currentOrder in orderArray)
+        {
+            if (SameCollision(currentOrder, newOrder)) { return true; }
+        }
+        return false;
     }
 
     private static bool SameCollision(CollisionOrder currentOrder ,CollisionOrder newOrder)
@@ -150,15 +179,16 @@ public partial struct CollisionOrderSystem : ISystem
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         var orderQuery = manager.CreateEntityQuery(typeof(CollisisonOrderQueue));
 
-        var arr = orderQuery.ToComponentArray<CollisisonOrderQueue>();
-        if (arr.Length == 0) { return; }
-        var orderQueue = arr[0].Queue;
+        var collisionOrderQueue = orderQuery.GetSingleton<CollisisonOrderQueue>();
+        var orderQueue = collisionOrderQueue.Queue;
+        var handeledOrders = collisionOrderQueue.HandledList;
+
 
         while (!orderQueue.IsEmpty())
         {
             var order = orderQueue.Dequeue();
-
-            Debug.Log("Entity: " + order.A.ToString() + " collided with Entity: " + order.B.ToString());
+            handeledOrders.Add(order);
+            Debug.LogError("Entity: " + order.A.ToString() + " collided with Entity: " + order.B.ToString());
         }
     }
 }

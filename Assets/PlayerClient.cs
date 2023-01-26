@@ -68,7 +68,7 @@ public class PlayerClient : MonoBehaviour
         manager.SetComponentData(e, new Player { index = user.Index });
         manager.SetComponentData(e, new Velocity { value = new Unity.Mathematics.float3(0.0f, 0.0f, 0.0f) });
         manager.SetComponentData(e, new Rotation { value = 0.0f });
-        manager.SetComponentData(e, new SizeComp { size = 1f });
+        manager.SetComponentData(e, new SizeComp { size = 0.5f });
         manager.SetComponentData(e, new Team { value = (user.Index % 2) == 1 });
 
         if (avatar.IsMe)
