@@ -1121,6 +1121,40 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 6019962568415534400, guid: 787486d3e6d7e1c47bcf6a07ef0b582e, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6019962568415534400, guid: 787486d3e6d7e1c47bcf6a07ef0b582e, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6019962568415534401, guid: 787486d3e6d7e1c47bcf6a07ef0b582e, type: 3}
+      propertyPath: m_Text
+      value: '
+
+'
+      objectReference: {fileID: 0}
+    - target: {fileID: 6019962568415534401, guid: 787486d3e6d7e1c47bcf6a07ef0b582e, type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6019962568582819252, guid: 787486d3e6d7e1c47bcf6a07ef0b582e, type: 3}
+      propertyPath: m_Text
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6019962568582819252, guid: 787486d3e6d7e1c47bcf6a07ef0b582e, type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6019962568582819255, guid: 787486d3e6d7e1c47bcf6a07ef0b582e, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6019962568582819255, guid: 787486d3e6d7e1c47bcf6a07ef0b582e, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6019962569781032412, guid: 787486d3e6d7e1c47bcf6a07ef0b582e, type: 3}
       propertyPath: m_Name
       value: ScoreCounter
