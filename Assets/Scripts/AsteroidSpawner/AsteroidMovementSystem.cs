@@ -11,6 +11,7 @@ public partial struct AsteroidMovementSystem : ISystem
     private ComponentLookup<AsteroidTag> asteroidLookup;
     private ComponentLookup<Position> position;
     private ComponentLookup<Rotation> rotation;
+    private ComponentLookup<Velocity> velocity;
 
     public void OnCreate(ref SystemState state)
     {
@@ -18,6 +19,7 @@ public partial struct AsteroidMovementSystem : ISystem
         asteroidLookup = state.GetComponentLookup<AsteroidTag>();
         position = state.GetComponentLookup<Position>();
         rotation = state.GetComponentLookup<Rotation>();
+        velocity = state.GetComponentLookup<Velocity>();
     }
 
     public void OnDestroy(ref SystemState state)
@@ -31,6 +33,8 @@ public partial struct AsteroidMovementSystem : ISystem
         asteroidLookup.Update(ref state);
         position.Update(ref state);
         rotation.Update(ref state);
+        velocity.Update(ref state);
+        
 
         NativeList<Entity> destroyedList = new NativeList<Entity>(Allocator.Temp);
         
@@ -47,13 +51,11 @@ public partial struct AsteroidMovementSystem : ISystem
             var asteroidPosition = position[asteroid];
             float3 newDir;
 
-            if (asteroidLookup[asteroid].direction.x == 0 && asteroidLookup[asteroid].direction.y == 0)
+           /* if (asteroidLookup[asteroid].direction.x == 0 && asteroidLookup[asteroid].direction.y == 0)
             {
-                dir = new float2(Random.Range(-1f, 1f),-1);
+                dir = new float2(Random.Range(-0.5f, 0.5f),-1);
                 state.EntityManager.SetComponentData(asteroid,new AsteroidTag{direction = dir, lifeTime = lifetime});
-            }
-            //float3 newPos = new float3(position[asteroid].value.x + asteroidLookup[asteroid].direction.x * 2f * SystemAPI.Time.DeltaTime,  position[asteroid].value.y + asteroidLookup[asteroid].direction.y * 2f * SystemAPI.Time.DeltaTime,0);
-           // state.EntityManager.SetComponentData(asteroid, new Position{value = newPos});
+            }*/
 
             newDir = new float3(dir.x, dir.y, 0);
             state.EntityManager.SetComponentData(asteroid,asteroidPosition);
@@ -70,23 +72,8 @@ public partial struct AsteroidMovementSystem : ISystem
         {
             state.EntityManager.DestroyEntity(asteroid);
         }
-        
-        /*foreach((TransformAspect transformAspect, RefRW<AsteroidTag> asteroid) in SystemAPI.Query<TransformAspect,RefRW<AsteroidTag>>())
-        {
-            if (asteroid.ValueRW.direction.x == 0 && asteroid.ValueRW.direction.y == 0)
-            {
-                SetAsteroidDir(ref state, asteroid);    
-            }
-            
-            asteroid.ValueRW.lifeTime -= SystemAPI.Time.DeltaTime;
-            transformAspect.LocalPosition += new float3( asteroid.ValueRW.direction.x * SystemAPI.Time.DeltaTime, asteroid.ValueRW.direction.y * SystemAPI.Time.DeltaTime,0);
-        }*/
 
         
     }
-
-    /*private void SetAsteroidDir(ref SystemState state, RefRW<AsteroidTag> asteroid)
-    {
-        asteroid.ValueRW.direction = new float2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
-    }*/
+    
 }

@@ -13,7 +13,7 @@ public partial class AsteroidDestroyerSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+       /* var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         
         Entities.WithStructuralChanges().ForEach((Entity entity, AsteroidTag asteroid) =>
         {
@@ -21,6 +21,6 @@ public partial class AsteroidDestroyerSystem : SystemBase
             {
                 manager.DestroyEntity(entity);
             }
-        }).Run();
+        }).Run();*/
     }
 }
