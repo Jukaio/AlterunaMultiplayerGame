@@ -66,15 +66,16 @@ public partial struct CollisionSystem : ISystem
 
     private EntityQuery query;
     private ComponentLookup<ColliderComp> m_ColliderCompLookup;
+    private ComponentLookup<Team> m_TeamLookup;
 
-    //TODO check if we should only collide with locals or if remotes are fine too
     public void OnCreate(ref SystemState state)
     {
         query = new EntityQueryBuilder(Allocator.Temp)
-         .WithAllRW<ColliderComp>()
+         .WithAllRW<ColliderComp,Team>()
          .Build(ref state);
 
         m_ColliderCompLookup = state.GetComponentLookup<ColliderComp>();
+        m_TeamLookup = state.GetComponentLookup<Team>();
     }
 
     public void OnDestroy(ref SystemState state)
@@ -86,6 +87,7 @@ public partial struct CollisionSystem : ISystem
     {
         var entities = query.ToEntityArray(Allocator.Temp);
         m_ColliderCompLookup.Update(ref state);
+        m_TeamLookup.Update(ref state);
 
         var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
         var orderQuery = manager.CreateEntityQuery(typeof(CollisisonOrderQueue));
@@ -100,6 +102,7 @@ public partial struct CollisionSystem : ISystem
             foreach (var entityB in entities)
             {
                 if (entityA == entityB) { continue; }
+                if (m_TeamLookup[entityA].value == m_TeamLookup[entityB].value) { continue; }
 
                 var aMin = m_ColliderCompLookup[entityA].Min;
                 var aMax = m_ColliderCompLookup[entityA].Max;
